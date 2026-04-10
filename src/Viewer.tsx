@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useLayoutEffect } from 'react'
+import { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react'
 import type { Entity, Layout } from './types'
 import { BlockCard } from './BlockCard'
 import type { CardRect } from './BlockCard'
@@ -19,6 +19,14 @@ interface Props {
   onDelete: (id: string) => void
   onAdd: (parentId: string | null, entity?: Entity) => void
   onSetLayout: (id: string | null, layout: Layout) => void
+  onConnect: (fromId: string, toId: string) => void
+  onDisconnect: (fromId: string, toId: string) => void
+}
+
+interface Arrow {
+  from: string
+  to: string
+  d: string
 }
 
 function findEntity(entities: Entity[], id: string): Entity | undefined {
@@ -31,11 +39,85 @@ function findEntity(entities: Entity[], id: string): Entity | undefined {
   }
 }
 
-export function Viewer({ root, editMode, rootLayout, onUpdate, onDelete, onAdd, onSetLayout }: Props) {
+// Distribute N connection points symmetrically around the center of an edge
+function slotPos(idx: number, total: number, edgeLen: number): number {
+  if (total <= 1) return 0
+  const spacing = Math.min(16, edgeLen * 0.6 / total)
+  return (idx - (total - 1) / 2) * spacing
+}
+
+function computeArrowPath(
+  fromRect: DOMRect,
+  toRect: DOMRect,
+  obstacleRects: DOMRect[],
+  containerRect: DOMRect,
+  exitIdx: number, exitTotal: number,
+  entryIdx: number, entryTotal: number
+): string {
+  const cl = containerRect.left
+  const ct = containerRect.top
+  const fromCX = (fromRect.left + fromRect.right) / 2
+  const fromCY = (fromRect.top + fromRect.bottom) / 2
+  const toCX = (toRect.left + toRect.right) / 2
+  const toCY = (toRect.top + toRect.bottom) / 2
+  const dx = toCX - fromCX
+  const dy = toCY - fromCY
+
+  const sameRow = Math.abs(dy) < Math.min(fromRect.height, toRect.height) * 0.5
+
+  if (sameRow) {
+    const goRight = dx >= 0
+    // Exit/entry on the left/right edges — slot along Y
+    const x1 = (goRight ? fromRect.right : fromRect.left) - cl
+    const y1 = fromCY - ct + slotPos(exitIdx, exitTotal, fromRect.height)
+    const x2 = (goRight ? toRect.left : toRect.right) - cl
+    const y2 = toCY - ct + slotPos(entryIdx, entryTotal, toRect.height)
+
+    const blocked = obstacleRects.some(r => {
+      const rCX = (r.left + r.right) / 2
+      const inX = goRight ? rCX > fromRect.right - 4 && rCX < toRect.left + 4
+                           : rCX < fromRect.left + 4 && rCX > toRect.right - 4
+      const inY = Math.abs((r.top + r.bottom) / 2 - fromCY) < (fromRect.height + r.height) * 0.4
+      return inX && inY
+    })
+
+    if (!blocked) {
+      const offset = Math.min(Math.abs(dx) * 0.4, 80)
+      const s = goRight ? 1 : -1
+      return `M ${x1} ${y1} C ${x1 + s * offset} ${y1}, ${x2 - s * offset} ${y2}, ${x2} ${y2}`
+    } else {
+      // Arc below the row — exit/entry on bottom edges, slot along X
+      const bx1 = fromCX - cl + slotPos(exitIdx, exitTotal, fromRect.width)
+      const by1 = fromRect.bottom - ct
+      const bx2 = toCX - cl + slotPos(entryIdx, entryTotal, toRect.width)
+      const by2 = toRect.bottom - ct
+      const arcY = Math.max(by1, by2) + 32
+      return `M ${bx1} ${by1} C ${bx1} ${arcY}, ${bx2} ${arcY}, ${bx2} ${by2}`
+    }
+  } else {
+    // Different rows — exit/entry on top/bottom edges, slot along X
+    const goDown = dy > 0
+    const x1 = fromCX - cl + slotPos(exitIdx, exitTotal, fromRect.width)
+    const y1 = (goDown ? fromRect.bottom : fromRect.top) - ct
+    const x2 = toCX - cl + slotPos(entryIdx, entryTotal, toRect.width)
+    const y2 = (goDown ? toRect.top : toRect.bottom) - ct
+    const fromEdge = goDown ? fromRect.bottom : fromRect.top
+    const toEdge = goDown ? toRect.top : toRect.bottom
+    const gapY = (fromEdge + toEdge) / 2 - ct
+    return `M ${x1} ${y1} C ${x1} ${gapY}, ${x2} ${gapY}, ${x2} ${y2}`
+  }
+}
+
+export function Viewer({ root, editMode, rootLayout, onUpdate, onDelete, onAdd, onSetLayout, onConnect, onDisconnect }: Props) {
   const slideRef = useRef<HTMLDivElement>(null)
   const pendingFrom = useRef<CardRect | null>(null)
   const needsReset = useRef(false)
   const isAnimating = useRef(false)
+  const cardElsMap = useRef(new Map<string, HTMLDivElement>())
+  const gridAreaRef = useRef<HTMLDivElement>(null)
+
+  const [connectingFrom, setConnectingFrom] = useState<string | null>(null)
+  const [arrows, setArrows] = useState<Arrow[]>([])
 
   const [stack, setStack] = useState<StackEntry[]>([
     { entities: root.slice(0, 6), label: 'Root' },
@@ -107,6 +189,87 @@ export function Viewer({ root, editMode, rootLayout, onUpdate, onDelete, onAdd, 
       }, { once: true })
     })
   }, [layoutKey])
+
+  // Cancel connecting when leaving edit mode
+  useEffect(() => {
+    if (!editMode) setConnectingFrom(null)
+  }, [editMode])
+
+  // ESC cancels connecting
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setConnectingFrom(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  // Recompute arrow paths after entities/layout settle
+  useEffect(() => {
+    // If a FLIP zoom-in transform is currently applied, getBoundingClientRect would
+    // return animated (wrong) positions. Clear arrows and defer until animation ends.
+    const slide = slideRef.current
+    const flipInProgress = !!(slide && slide.style.transform !== '')
+
+    function doCompute() {
+      const container = gridAreaRef.current
+      if (!container) { setArrows([]); return }
+      const containerRect = container.getBoundingClientRect()
+
+      const entrySlots = new Map<string, string[]>()
+      for (const entity of current.entities) {
+        for (const toId of entity.connections ?? []) {
+          if (!entrySlots.has(toId)) entrySlots.set(toId, [])
+          entrySlots.get(toId)!.push(entity.id)
+        }
+      }
+
+      const next: Arrow[] = []
+      for (const entity of current.entities) {
+        if (!entity.connections?.length) continue
+        const fromEl = cardElsMap.current.get(entity.id)
+        if (!fromEl) continue
+        const exitTotal = entity.connections.length
+
+        for (let exitIdx = 0; exitIdx < entity.connections.length; exitIdx++) {
+          const toId = entity.connections[exitIdx]
+          const toEl = cardElsMap.current.get(toId)
+          if (!toEl) continue
+
+          const entries = entrySlots.get(toId) ?? []
+          const entryIdx = Math.max(0, entries.indexOf(entity.id))
+          const entryTotal = entries.length
+
+          const obstacles: DOMRect[] = []
+          for (const [oid, oel] of cardElsMap.current) {
+            if (oid !== entity.id && oid !== toId) obstacles.push(oel.getBoundingClientRect())
+          }
+          next.push({
+            from: entity.id, to: toId,
+            d: computeArrowPath(
+              fromEl.getBoundingClientRect(), toEl.getBoundingClientRect(),
+              obstacles, containerRect,
+              exitIdx, exitTotal,
+              entryIdx, entryTotal
+            )
+          })
+        }
+      }
+      setArrows(next)
+    }
+
+    if (flipInProgress) {
+      // Hide arrows during animation, recompute once transition ends (500ms + buffer)
+      setArrows([])
+      const timer = setTimeout(doCompute, 520)
+      return () => clearTimeout(timer)
+    }
+
+    doCompute()
+  }, [current.entities, layoutKey, editMode])
+
+  const registerCard = useCallback((id: string, el: HTMLDivElement | null) => {
+    if (el) cardElsMap.current.set(id, el)
+    else cardElsMap.current.delete(id)
+  }, [])
 
   function drillIn(entity: Entity, cardRect: CardRect) {
     if (!entity.children?.length) return
@@ -208,7 +371,7 @@ export function Viewer({ root, editMode, rootLayout, onUpdate, onDelete, onAdd, 
           </div>
         )}
 
-        <div className={`${styles.gridArea} ${isNested ? styles.gridAreaNested : ''}`}>
+        <div ref={gridAreaRef} className={`${styles.gridArea} ${isNested ? styles.gridAreaNested : ''}`}>
           {editMode && (
             <div className={styles.layoutToggle}>
               <button
@@ -237,9 +400,34 @@ export function Viewer({ root, editMode, rootLayout, onUpdate, onDelete, onAdd, 
               ? current.entities.length + (editMode && current.entities.length < 6 ? 1 : 0)
               : undefined}
           >
-            {current.entities.map((entity) => (
-              <BlockCard key={entity.id} entity={entity} layout={currentLayout} editMode={editMode} onUpdate={onUpdate} onDelete={onDelete} onAddChild={addChildAndDrillIn} onDrillIn={drillIn} />
-            ))}
+            {current.entities.map((entity) => {
+              const sourceConnections = connectingFrom
+                ? current.entities.find(e => e.id === connectingFrom)?.connections ?? []
+                : []
+              return (
+                <BlockCard
+                  key={entity.id}
+                  entity={entity}
+                  layout={currentLayout}
+                  editMode={editMode}
+                  onUpdate={onUpdate}
+                  onDelete={onDelete}
+                  onAddChild={addChildAndDrillIn}
+                  onDrillIn={drillIn}
+                  connectingFrom={connectingFrom}
+                  isConnected={sourceConnections.includes(entity.id)}
+                  onStartConnect={(id) => setConnectingFrom(id === connectingFrom ? null : id)}
+                  onConnectTarget={() => {
+                    if (!connectingFrom) return
+                    const already = sourceConnections.includes(entity.id)
+                    if (already) onDisconnect(connectingFrom, entity.id)
+                    else onConnect(connectingFrom, entity.id)
+                    setConnectingFrom(null)
+                  }}
+                  onRegisterEl={registerCard}
+                />
+              )
+            })}
             {editMode && current.entities.length < 6 && (
               <button
                 className={styles.addBlock}
@@ -253,6 +441,19 @@ export function Viewer({ root, editMode, rootLayout, onUpdate, onDelete, onAdd, 
               </button>
             )}
           </div>
+
+          {arrows.length > 0 && (
+            <svg className={styles.arrowSvg} aria-hidden="true">
+              <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="8" refX="5" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                  <path d="M 0 0 L 10 4 L 0 8 Z" fill="#3d6aff" />
+                </marker>
+              </defs>
+              {arrows.map((a, i) => (
+                <path key={i} d={a.d} fill="none" stroke="#3d6aff" strokeWidth="2" strokeOpacity="0.7" markerEnd="url(#arrowhead)" />
+              ))}
+            </svg>
+          )}
         </div>
       </div>
     </div>

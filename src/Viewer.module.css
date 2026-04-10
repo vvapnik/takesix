@@ -118,6 +118,18 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  position: relative;
+}
+
+/* SVG arrow overlay */
+.arrowSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 3;
 }
 
 /* Nested: dashed border matching BlockCard .childrenSection */

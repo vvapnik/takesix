@@ -6,5 +6,6 @@ export interface Entity {
   title: string
   description: string
   layout?: Layout
+  connections?: string[] // IDs of entities this one connects to (same level)
   children?: Entity[]
 }
