@@ -1,16 +1,17 @@
 .takeSix {
-  width: 100vw;
-  height: 100vh;
+  flex: 1;
+  min-height: 0;
   padding: 48px 60px 44px;
   box-sizing: border-box;
   background: #f0f2f5;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   position: relative;
+  overflow: hidden;
 }
 
 .modeToggle {
   position: fixed;
-  top: 20px;
+  top: 64px;
   right: 24px;
   z-index: 100;
   display: flex;
