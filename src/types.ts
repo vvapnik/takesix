@@ -1,4 +1,4 @@
-export type Layout = 'tiles' | 'list'
+export type Layout = 'tiles' | 'list' | 'circle'
 
 export interface Entity {
   id: string

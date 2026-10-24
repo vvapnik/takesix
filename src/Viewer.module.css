@@ -216,3 +216,27 @@
 .grid[data-count='4'] { grid-template-columns: repeat(2, auto); justify-content: space-evenly; }
 .grid[data-count='5'] { grid-template-columns: repeat(3, auto); justify-content: space-evenly; }
 .grid[data-count='6'] { grid-template-columns: repeat(3, auto); justify-content: space-evenly; }
+
+/* Circle layout */
+.circleGrid {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.circleItem {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 220px;
+}
+
+.addBlockCenter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  min-height: unset;
+}

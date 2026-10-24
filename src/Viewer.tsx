@@ -46,16 +46,13 @@ function slotPos(idx: number, total: number, edgeLen: number): number {
   return (idx - (total - 1) / 2) * spacing
 }
 
-function computeArrowPath(
+type Edge = 'left' | 'right' | 'top' | 'bottom'
+
+function determineEdges(
   fromRect: DOMRect,
   toRect: DOMRect,
   obstacleRects: DOMRect[],
-  containerRect: DOMRect,
-  exitIdx: number, exitTotal: number,
-  entryIdx: number, entryTotal: number
-): string {
-  const cl = containerRect.left
-  const ct = containerRect.top
+): { exitEdge: Edge; entryEdge: Edge } {
   const fromCX = (fromRect.left + fromRect.right) / 2
   const fromCY = (fromRect.top + fromRect.bottom) / 2
   const toCX = (toRect.left + toRect.right) / 2
@@ -64,48 +61,68 @@ function computeArrowPath(
   const dy = toCY - fromCY
 
   const sameRow = Math.abs(dy) < Math.min(fromRect.height, toRect.height) * 0.5
-
   if (sameRow) {
     const goRight = dx >= 0
-    // Exit/entry on the left/right edges — slot along Y
-    const x1 = (goRight ? fromRect.right : fromRect.left) - cl
-    const y1 = fromCY - ct + slotPos(exitIdx, exitTotal, fromRect.height)
-    const x2 = (goRight ? toRect.left : toRect.right) - cl
-    const y2 = toCY - ct + slotPos(entryIdx, entryTotal, toRect.height)
-
     const blocked = obstacleRects.some(r => {
       const rCX = (r.left + r.right) / 2
-      const inX = goRight ? rCX > fromRect.right - 4 && rCX < toRect.left + 4
-                           : rCX < fromRect.left + 4 && rCX > toRect.right - 4
+      const inX = goRight
+        ? rCX > fromRect.right - 4 && rCX < toRect.left + 4
+        : rCX < fromRect.left + 4 && rCX > toRect.right - 4
       const inY = Math.abs((r.top + r.bottom) / 2 - fromCY) < (fromRect.height + r.height) * 0.4
       return inX && inY
     })
-
     if (!blocked) {
-      const offset = Math.min(Math.abs(dx) * 0.4, 80)
-      const s = goRight ? 1 : -1
-      return `M ${x1} ${y1} C ${x1 + s * offset} ${y1}, ${x2 - s * offset} ${y2}, ${x2} ${y2}`
-    } else {
-      // Arc below the row — exit/entry on bottom edges, slot along X
-      const bx1 = fromCX - cl + slotPos(exitIdx, exitTotal, fromRect.width)
-      const by1 = fromRect.bottom - ct
-      const bx2 = toCX - cl + slotPos(entryIdx, entryTotal, toRect.width)
-      const by2 = toRect.bottom - ct
-      const arcY = Math.max(by1, by2) + 32
-      return `M ${bx1} ${by1} C ${bx1} ${arcY}, ${bx2} ${arcY}, ${bx2} ${by2}`
+      return { exitEdge: goRight ? 'right' : 'left', entryEdge: goRight ? 'left' : 'right' }
     }
-  } else {
-    // Different rows — exit/entry on top/bottom edges, slot along X
-    const goDown = dy > 0
-    const x1 = fromCX - cl + slotPos(exitIdx, exitTotal, fromRect.width)
-    const y1 = (goDown ? fromRect.bottom : fromRect.top) - ct
-    const x2 = toCX - cl + slotPos(entryIdx, entryTotal, toRect.width)
-    const y2 = (goDown ? toRect.top : toRect.bottom) - ct
-    const fromEdge = goDown ? fromRect.bottom : fromRect.top
-    const toEdge = goDown ? toRect.top : toRect.bottom
-    const gapY = (fromEdge + toEdge) / 2 - ct
-    return `M ${x1} ${y1} C ${x1} ${gapY}, ${x2} ${gapY}, ${x2} ${y2}`
+    return { exitEdge: 'bottom', entryEdge: 'bottom' }
   }
+
+  const goDown = dy > 0
+  return { exitEdge: goDown ? 'bottom' : 'top', entryEdge: goDown ? 'top' : 'bottom' }
+}
+
+function edgePoint(
+  rect: DOMRect, edge: Edge, idx: number, total: number, cl: number, ct: number,
+): { x: number; y: number } {
+  const cx = (rect.left + rect.right) / 2
+  const cy = (rect.top + rect.bottom) / 2
+  switch (edge) {
+    case 'right':  return { x: rect.right  - cl, y: cy - ct + slotPos(idx, total, rect.height) }
+    case 'left':   return { x: rect.left   - cl, y: cy - ct + slotPos(idx, total, rect.height) }
+    case 'bottom': return { x: cx - cl + slotPos(idx, total, rect.width), y: rect.bottom - ct }
+    case 'top':    return { x: cx - cl + slotPos(idx, total, rect.width), y: rect.top    - ct }
+  }
+}
+
+function computeArrowPath(
+  fromRect: DOMRect,
+  toRect: DOMRect,
+  containerRect: DOMRect,
+  exitEdge: Edge, exitIdx: number, exitTotal: number,
+  entryEdge: Edge, entryIdx: number, entryTotal: number,
+): string {
+  const cl = containerRect.left
+  const ct = containerRect.top
+  const { x: x1, y: y1 } = edgePoint(fromRect, exitEdge, exitIdx, exitTotal, cl, ct)
+  const { x: x2, y: y2 } = edgePoint(toRect,   entryEdge, entryIdx, entryTotal, cl, ct)
+
+  if (exitEdge === 'bottom' && entryEdge === 'bottom') {
+    const arcY = Math.max(y1, y2) + 32
+    return `M ${x1} ${y1} C ${x1} ${arcY}, ${x2} ${arcY}, ${x2} ${y2}`
+  }
+
+  if (exitEdge === 'right' || exitEdge === 'left') {
+    const toCX = (toRect.left + toRect.right) / 2
+    const fromCX = (fromRect.left + fromRect.right) / 2
+    const s = exitEdge === 'right' ? 1 : -1
+    const offset = Math.min(Math.abs(toCX - fromCX) * 0.4, 80)
+    return `M ${x1} ${y1} C ${x1 + s * offset} ${y1}, ${x2 - s * offset} ${y2}, ${x2} ${y2}`
+  }
+
+  const fromEdgeY = exitEdge === 'bottom' ? fromRect.bottom : fromRect.top
+  const toEdgeY   = entryEdge === 'top'   ? toRect.top     : toRect.bottom
+  const midY = (fromEdgeY + toEdgeY) / 2 - ct
+  return `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`
 }
 
 export function Viewer({ root, editMode, rootLayout, onUpdate, onDelete, onAdd, onSetLayout, onConnect, onDisconnect }: Props) {
@@ -115,9 +132,11 @@ export function Viewer({ root, editMode, rootLayout, onUpdate, onDelete, onAdd, 
   const isAnimating = useRef(false)
   const cardElsMap = useRef(new Map<string, HTMLDivElement>())
   const gridAreaRef = useRef<HTMLDivElement>(null)
+  const circleContainerRef = useRef<HTMLDivElement>(null)
 
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null)
   const [arrows, setArrows] = useState<Arrow[]>([])
+  const [circleSize, setCircleSize] = useState({ w: 0, h: 0 })
 
   const [stack, setStack] = useState<StackEntry[]>([
     { entities: root.slice(0, 6), label: 'Root' },
@@ -214,44 +233,60 @@ export function Viewer({ root, editMode, rootLayout, onUpdate, onDelete, onAdd, 
       if (!container) { setArrows([]); return }
       const containerRect = container.getBoundingClientRect()
 
-      const entrySlots = new Map<string, string[]>()
-      for (const entity of current.entities) {
-        for (const toId of entity.connections ?? []) {
-          if (!entrySlots.has(toId)) entrySlots.set(toId, [])
-          entrySlots.get(toId)!.push(entity.id)
-        }
+      // First pass: collect all connections with their rects and resolved edges
+      interface ConnInfo {
+        fromId: string; toId: string
+        fromRect: DOMRect; toRect: DOMRect
+        exitEdge: Edge; entryEdge: Edge
       }
-
-      const next: Arrow[] = []
+      const conns: ConnInfo[] = []
       for (const entity of current.entities) {
         if (!entity.connections?.length) continue
         const fromEl = cardElsMap.current.get(entity.id)
         if (!fromEl) continue
-        const exitTotal = entity.connections.length
-
-        for (let exitIdx = 0; exitIdx < entity.connections.length; exitIdx++) {
-          const toId = entity.connections[exitIdx]
+        const fromRect = fromEl.getBoundingClientRect()
+        for (const toId of entity.connections) {
           const toEl = cardElsMap.current.get(toId)
           if (!toEl) continue
-
-          const entries = entrySlots.get(toId) ?? []
-          const entryIdx = Math.max(0, entries.indexOf(entity.id))
-          const entryTotal = entries.length
-
+          const toRect = toEl.getBoundingClientRect()
           const obstacles: DOMRect[] = []
           for (const [oid, oel] of cardElsMap.current) {
             if (oid !== entity.id && oid !== toId) obstacles.push(oel.getBoundingClientRect())
           }
-          next.push({
-            from: entity.id, to: toId,
-            d: computeArrowPath(
-              fromEl.getBoundingClientRect(), toEl.getBoundingClientRect(),
-              obstacles, containerRect,
-              exitIdx, exitTotal,
-              entryIdx, entryTotal
-            )
-          })
+          const { exitEdge, entryEdge } = determineEdges(fromRect, toRect, obstacles)
+          conns.push({ fromId: entity.id, toId, fromRect, toRect, exitEdge, entryEdge })
         }
+      }
+
+      // Build combined per-card-edge slot pools. Exits and entries on the same
+      // edge of the same card share a single pool so they never overlap.
+      const edgePools = new Map<string, Array<{ ci: number; role: 'exit' | 'entry' }>>()
+      for (let ci = 0; ci < conns.length; ci++) {
+        const { fromId, toId, exitEdge, entryEdge } = conns[ci]
+        const ek = `${fromId}-${exitEdge}`
+        if (!edgePools.has(ek)) edgePools.set(ek, [])
+        edgePools.get(ek)!.push({ ci, role: 'exit' })
+        const nk = `${toId}-${entryEdge}`
+        if (!edgePools.has(nk)) edgePools.set(nk, [])
+        edgePools.get(nk)!.push({ ci, role: 'entry' })
+      }
+
+      // Second pass: compute paths using combined slot indices
+      const next: Arrow[] = []
+      for (let ci = 0; ci < conns.length; ci++) {
+        const { fromId, toId, fromRect, toRect, exitEdge, entryEdge } = conns[ci]
+        const exitPool  = edgePools.get(`${fromId}-${exitEdge}`)!
+        const entryPool = edgePools.get(`${toId}-${entryEdge}`)!
+        const exitIdx  = exitPool.findIndex(s => s.ci === ci && s.role === 'exit')
+        const entryIdx = entryPool.findIndex(s => s.ci === ci && s.role === 'entry')
+        next.push({
+          from: fromId, to: toId,
+          d: computeArrowPath(
+            fromRect, toRect, containerRect,
+            exitEdge, exitIdx, exitPool.length,
+            entryEdge, entryIdx, entryPool.length,
+          ),
+        })
       }
       setArrows(next)
     }
@@ -266,10 +301,33 @@ export function Viewer({ root, editMode, rootLayout, onUpdate, onDelete, onAdd, 
     doCompute()
   }, [current.entities, layoutKey, editMode])
 
+  useEffect(() => {
+    if (currentLayout !== 'circle') return
+    const el = circleContainerRef.current
+    if (!el) return
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect
+      setCircleSize({ w: width, h: height })
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [currentLayout])
+
   const registerCard = useCallback((id: string, el: HTMLDivElement | null) => {
     if (el) cardElsMap.current.set(id, el)
     else cardElsMap.current.delete(id)
   }, [])
+
+  const circlePositions: Array<{ x: number; y: number }> = (() => {
+    if (currentLayout !== 'circle' || circleSize.w === 0) return []
+    const { w, h } = circleSize
+    const n = current.entities.length
+    const r = Math.min(w, h) * 0.38
+    return Array.from({ length: n }, (_, i) => {
+      const angle = (i / n) * 2 * Math.PI - Math.PI / 2
+      return { x: w / 2 + r * Math.cos(angle), y: h / 2 + r * Math.sin(angle) }
+    })
+  })()
 
   function drillIn(entity: Entity, cardRect: CardRect) {
     if (!entity.children?.length) return
@@ -390,57 +448,116 @@ export function Viewer({ root, editMode, rootLayout, onUpdate, onDelete, onAdd, 
               >
                 <ListIcon />
               </button>
+              <button
+                className={`${styles.layoutBtn} ${currentLayout === 'circle' ? styles.layoutBtnActive : ''}`}
+                onClick={() => onSetLayout(current.entity?.id ?? null, 'circle')}
+                aria-label="Circle layout"
+                title="Circle"
+              >
+                <CircleLayoutIcon />
+              </button>
             </div>
           )}
 
-          <div
-            className={styles.grid}
-            data-layout={currentLayout}
-            data-count={currentLayout === 'tiles'
-              ? current.entities.length + (editMode && current.entities.length < 6 ? 1 : 0)
-              : undefined}
-          >
-            {current.entities.map((entity) => {
-              const sourceConnections = connectingFrom
-                ? current.entities.find(e => e.id === connectingFrom)?.connections ?? []
-                : []
-              return (
-                <BlockCard
-                  key={entity.id}
-                  entity={entity}
-                  layout={currentLayout}
-                  editMode={editMode}
-                  onUpdate={onUpdate}
-                  onDelete={onDelete}
-                  onAddChild={addChildAndDrillIn}
-                  onDrillIn={drillIn}
-                  connectingFrom={connectingFrom}
-                  isConnected={sourceConnections.includes(entity.id)}
-                  onStartConnect={(id) => setConnectingFrom(id === connectingFrom ? null : id)}
-                  onConnectTarget={() => {
-                    if (!connectingFrom) return
-                    const already = sourceConnections.includes(entity.id)
-                    if (already) onDisconnect(connectingFrom, entity.id)
-                    else onConnect(connectingFrom, entity.id)
-                    setConnectingFrom(null)
-                  }}
-                  onRegisterEl={registerCard}
-                />
-              )
-            })}
-            {editMode && current.entities.length < 6 && (
-              <button
-                className={styles.addBlock}
-                onClick={() => onAdd(current.entity?.id ?? null)}
-                aria-label="Add entity"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-              </button>
-            )}
-          </div>
+          {currentLayout === 'circle' ? (
+            <div ref={circleContainerRef} className={styles.circleGrid}>
+              {current.entities.map((entity, i) => {
+                const pos = circlePositions[i]
+                const sourceConnections = connectingFrom
+                  ? current.entities.find(e => e.id === connectingFrom)?.connections ?? []
+                  : []
+                return (
+                  <div
+                    key={entity.id}
+                    className={styles.circleItem}
+                    style={pos ? { left: pos.x, top: pos.y } : { visibility: 'hidden' }}
+                  >
+                    <BlockCard
+                      entity={entity}
+                      layout="tiles"
+                      editMode={editMode}
+                      onUpdate={onUpdate}
+                      onDelete={onDelete}
+                      onAddChild={addChildAndDrillIn}
+                      onDrillIn={drillIn}
+                      connectingFrom={connectingFrom}
+                      isConnected={sourceConnections.includes(entity.id)}
+                      onStartConnect={(id) => setConnectingFrom(id === connectingFrom ? null : id)}
+                      onConnectTarget={() => {
+                        if (!connectingFrom) return
+                        const already = sourceConnections.includes(entity.id)
+                        if (already) onDisconnect(connectingFrom, entity.id)
+                        else onConnect(connectingFrom, entity.id)
+                        setConnectingFrom(null)
+                      }}
+                      onRegisterEl={registerCard}
+                    />
+                  </div>
+                )
+              })}
+              {editMode && current.entities.length < 6 && (
+                <button
+                  className={`${styles.addBlock} ${styles.addBlockCenter}`}
+                  onClick={() => onAdd(current.entity?.id ?? null)}
+                  aria-label="Add entity"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          ) : (
+            <div
+              className={styles.grid}
+              data-layout={currentLayout}
+              data-count={currentLayout === 'tiles'
+                ? current.entities.length + (editMode && current.entities.length < 6 ? 1 : 0)
+                : undefined}
+            >
+              {current.entities.map((entity) => {
+                const sourceConnections = connectingFrom
+                  ? current.entities.find(e => e.id === connectingFrom)?.connections ?? []
+                  : []
+                return (
+                  <BlockCard
+                    key={entity.id}
+                    entity={entity}
+                    layout={currentLayout}
+                    editMode={editMode}
+                    onUpdate={onUpdate}
+                    onDelete={onDelete}
+                    onAddChild={addChildAndDrillIn}
+                    onDrillIn={drillIn}
+                    connectingFrom={connectingFrom}
+                    isConnected={sourceConnections.includes(entity.id)}
+                    onStartConnect={(id) => setConnectingFrom(id === connectingFrom ? null : id)}
+                    onConnectTarget={() => {
+                      if (!connectingFrom) return
+                      const already = sourceConnections.includes(entity.id)
+                      if (already) onDisconnect(connectingFrom, entity.id)
+                      else onConnect(connectingFrom, entity.id)
+                      setConnectingFrom(null)
+                    }}
+                    onRegisterEl={registerCard}
+                  />
+                )
+              })}
+              {editMode && current.entities.length < 6 && (
+                <button
+                  className={styles.addBlock}
+                  onClick={() => onAdd(current.entity?.id ?? null)}
+                  aria-label="Add entity"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
 
           {arrows.length > 0 && (
             <svg className={styles.arrowSvg} aria-hidden="true">
@@ -477,6 +594,19 @@ function ListIcon() {
       <line x1="3" y1="6" x2="21" y2="6" />
       <line x1="3" y1="12" x2="21" y2="12" />
       <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  )
+}
+
+function CircleLayoutIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <circle cx="12" cy="2.5" r="2" />
+      <circle cx="19.8" cy="7" r="2" />
+      <circle cx="19.8" cy="17" r="2" />
+      <circle cx="12" cy="21.5" r="2" />
+      <circle cx="4.2" cy="17" r="2" />
+      <circle cx="4.2" cy="7" r="2" />
     </svg>
   )
 }
