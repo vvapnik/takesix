@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
-import { TakeSix } from './TakeSix'
+import { TakeSix } from '../src'
 import { sampleData } from './sample-data'
-import type { Entity } from './types'
+import type { Entity } from '../src'
 import styles from './App.module.css'
 
 export function App() {
