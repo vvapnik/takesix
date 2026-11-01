@@ -1,13 +1,13 @@
 # TakeSix site
 
-The landing page and live demo of [TakeSix](https://vvapnik.github.io/takesix/):
+The landing page and live demo of [TakeSix](https://takesix.vapnik.de/):
 answers as diagrams, not walls of text.
 
 - **Landing page** (`index.html`): two screens with snap scrolling. The pitch
   with install commands and a looping mini demo on top, a live TakeSix diagram
   about TakeSix below, rendered with
   [`@takesix/react`](https://github.com/vvapnik/takesix-react).
-- **Editor** (`editor/index.html`, served at `/takesix/editor/`): open a
+- **Editor** (`editor/index.html`, served at `/editor/`): open a
   `.takesix.json` file (button or drag and drop), edit it, save it back. No
   backend: nothing leaves the browser.
 
@@ -25,7 +25,7 @@ Node 24 LTS (`.nvmrc`).
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173/takesix/ and /takesix/editor/
+npm run dev        # http://localhost:5173/ and /editor/
 npm run validate   # check the diagram in src/takesix.takesix.json
 npm run build      # static site in dist/
 ```
@@ -35,7 +35,10 @@ run `npm run validate`.
 
 Every push to `main` builds the site and deploys it to GitHub Pages
 (`.github/workflows/pages.yml`). Pages must use "GitHub Actions" as its source
-in the repository settings.
+in the repository settings. The site is served at https://takesix.vapnik.de/
+(a CNAME to `vvapnik.github.io` in Cloudflare, DNS only, plus the custom
+domain in the Pages settings). Asset paths are relative (`base: './'`), so the
+build also works under `vvapnik.github.io/takesix/`.
 
 ## AI-assisted development
 
