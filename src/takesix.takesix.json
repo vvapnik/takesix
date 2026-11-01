@@ -1,0 +1,164 @@
+{
+  "takesix": "1.0",
+  "title": "TakeSix, explained by itself",
+  "description": "Click any block to open it. Every screen shows six blocks at most; longer text waits in the side panel",
+  "blocks": [
+    {
+      "id": "idea",
+      "icon": "◆",
+      "title": "The idea",
+      "description": "An agent answers with a diagram you can click into, not pages of prose. Click Me! I have more inside",
+      "size": "F",
+      "details": "Ask an agent to explain a codebase, a spec or a plan and you usually get many screens of headings and bullet lists. TakeSix turns that answer into a tree: the whole thing fits on the first screen, and each part opens into its own screen.",
+      "children": [
+        {
+          "id": "idea-six",
+          "icon": "6",
+          "title": "Six at most",
+          "description": "A screen you can take in at a glance",
+          "size": "S",
+          "details": "Six is a hard limit, checked by the validator. When there are more things to show, they are grouped into a parent that names what they share. That grouping is the explanation."
+        },
+        {
+          "id": "idea-depth",
+          "icon": "↘",
+          "title": "Depth on demand",
+          "description": "The gist first, details one click away",
+          "size": "S",
+          "details": "Cards show a title and one line. Click to open a block, use the breadcrumb to go back. Long explanations, code and lists live in a Markdown side panel."
+        },
+        {
+          "id": "idea-checked",
+          "icon": "✓",
+          "title": "Checked, not guessed",
+          "description": "A JSON format with a schema an agent can validate against",
+          "size": "S",
+          "details": "Errors come with JSON paths (`/blocks/2/children: 7 blocks on one level`), so the agent fixes its own answer before you see it."
+        }
+      ]
+    },
+    {
+      "id": "agents",
+      "icon": "🤖",
+      "title": "For agents",
+      "description": "A skill and an MCP server",
+      "size": "S",
+      "details": "Both teach the agent the same rules for readable diagrams, check the result and render it.",
+      "children": [
+        {
+          "id": "agents-mcp",
+          "icon": "⚙",
+          "title": "MCP server",
+          "description": "@takesix/mcp for any MCP client",
+          "size": "M",
+          "details": "```\nclaude mcp add takesix -- npx -y @takesix/mcp\ncodex mcp add takesix -- npx -y @takesix/mcp\n```\nTools: `guide` (the rules), `validate`, `show` (writes one HTML file). Runs locally over stdio."
+        },
+        {
+          "id": "agents-app",
+          "icon": "▶",
+          "title": "In the conversation",
+          "description": "MCP Apps hosts show the diagram inline",
+          "size": "M",
+          "details": "In clients that support MCP Apps, such as Claude Desktop, `show` opens the diagram right in the chat, with a full screen button. Elsewhere you get a self-contained HTML file."
+        },
+        {
+          "id": "agents-skill",
+          "icon": "📘",
+          "title": "Agent Skill",
+          "description": "For Claude: rules plus a validate and render script",
+          "size": "F",
+          "details": "Copy `skill/takesix` from the takesix-agent repository into `~/.claude/skills/`. It needs only Node.js: the script and the viewer are bundled."
+        }
+      ]
+    },
+    {
+      "id": "format",
+      "icon": "{ }",
+      "title": "The format",
+      "description": "Plain JSON: blocks, children, links",
+      "size": "S",
+      "details": "```json\n{\n  \"takesix\": \"1.0\",\n  \"title\": \"Payments\",\n  \"blocks\": [\n    { \"id\": \"api\", \"title\": \"API\", \"size\": \"S\" },\n    { \"id\": \"bank\", \"title\": \"Bank\" }\n  ],\n  \"links\": [{ \"from\": \"api\", \"to\": \"bank\" }]\n}\n```\nFull specification: [FORMAT.md](https://github.com/vvapnik/takesix-core/blob/main/FORMAT.md)",
+      "children": [
+        {
+          "id": "format-block",
+          "icon": "▢",
+          "title": "Block",
+          "description": "id, title, one-line description, up to six children",
+          "size": "S",
+          "details": "Optional fields: `icon`, `size`, `details` (Markdown for the side panel) and `meta` for data of other tools. Ids are stable, so links and comments can rely on them."
+        },
+        {
+          "id": "format-size",
+          "icon": "▤",
+          "title": "Size",
+          "description": "S, M, L or F on a six-column grid",
+          "size": "S",
+          "details": "- **S** a third of the width\n- **M** a half (default)\n- **L** two thirds\n- **F** the full width\n\nBlocks flow left to right and wrap. Plans use F, so each step is a row."
+        },
+        {
+          "id": "format-link",
+          "icon": "↗",
+          "title": "Link",
+          "description": "Between any two blocks, on any levels",
+          "size": "S",
+          "details": "`from`, `to`, an optional `label` and `direction`. A link between nested blocks also shows one level up, as an arrow between their parents."
+        }
+      ]
+    },
+    {
+      "id": "apps",
+      "icon": "▣",
+      "title": "For apps",
+      "description": "Viewer and editor for React",
+      "size": "S",
+      "details": "```\nnpm install @takesix/react\n```",
+      "children": [
+        {
+          "id": "apps-react",
+          "icon": "⬡",
+          "title": "@takesix/react",
+          "description": "One component: view, or edit with onChange",
+          "size": "M",
+          "details": "```tsx\nimport { TakeSix } from '@takesix/react'\nimport '@takesix/react/style.css'\n\n<TakeSix document={doc} onChange={setDoc} editing />\n```\nLight and dark themes, drag and drop, grouping, phones. This page uses it."
+        },
+        {
+          "id": "apps-core",
+          "icon": "◇",
+          "title": "@takesix/core",
+          "description": "Parse, validate, edit; no dependencies",
+          "size": "M",
+          "details": "Everything about the document without UI: `parseDocument`, `validateDocument`, immutable edits, and `visibleLinks` for drawing arrows on a level."
+        }
+      ]
+    },
+    {
+      "id": "open",
+      "icon": "○",
+      "title": "Open source",
+      "description": "MIT licensed: format, libraries, skill and MCP server. Next: integrations",
+      "size": "F",
+      "children": [
+        {
+          "id": "open-repos",
+          "icon": "⌥",
+          "title": "Repositories",
+          "description": "core, react, agent, and this site",
+          "size": "M",
+          "details": "- [takesix-core](https://github.com/vvapnik/takesix-core)\n- [takesix-react](https://github.com/vvapnik/takesix-react)\n- [takesix-agent](https://github.com/vvapnik/takesix-agent)\n- [takesix](https://github.com/vvapnik/takesix)"
+        },
+        {
+          "id": "open-next",
+          "icon": "…",
+          "title": "Coming next",
+          "description": "Confluence and other integrations, export, embedding",
+          "size": "M",
+          "details": "- Plugins: Confluence first, then Notion, GitHub, VS Code, Obsidian\n- Embedding with an `<iframe>` or a `<take-six>` web component\n- Converters from C4, Mermaid, OpenAPI\n- Presentation mode and PNG/SVG export"
+        }
+      ]
+    }
+  ],
+  "links": [
+    { "from": "agents", "to": "format", "label": "write" },
+    { "from": "format", "to": "apps", "label": "read" }
+  ]
+}

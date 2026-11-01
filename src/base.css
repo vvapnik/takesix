@@ -1,0 +1,91 @@
+/* Shared by the landing page and the editor. Tokens follow the viewer's own
+   (--ts-*), so the page chrome and the diagrams read as one in both themes. */
+:root {
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --sunken: #e6eaf0;
+  --ink: #1a2332;
+  --ink-2: #5a6a7e;
+  --ink-3: #7a8a9e;
+  --line: #d0d7e2;
+  --accent: #3d6aff;
+  --accent-hover: #2a55e8;
+  --accent-soft: #e2e9ff;
+  --on-accent: #ffffff;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+
+/* data-theme on <html> forces a theme (the editor's switch); without it the
+   system setting wins. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0f141b;
+    --surface: #18202b;
+    --sunken: #141b24;
+    --ink: #e6ebf2;
+    --ink-2: #b3bfcd;
+    --ink-3: #94a3b5;
+    --line: #2c3644;
+    --accent: #6b8cff;
+    --accent-hover: #8aa4ff;
+    --accent-soft: #1e2a48;
+    --on-accent: #0f141b;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #0f141b;
+  --surface: #18202b;
+  --sunken: #141b24;
+  --ink: #e6ebf2;
+  --ink-2: #b3bfcd;
+  --ink-3: #94a3b5;
+  --line: #2c3644;
+  --accent: #6b8cff;
+  --accent-hover: #8aa4ff;
+  --accent-soft: #1e2a48;
+  --on-accent: #0f141b;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  height: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
