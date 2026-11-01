@@ -5,6 +5,7 @@ import diagramSource from './takesix.takesix.json?raw'
 // Inlined so the logo takes the text colour (it draws with currentColor)
 import logoSvg from './logo.svg?raw'
 import { Stage } from './Stage'
+import { DiagramOutline } from './DiagramOutline'
 
 const parsed = parseDocument(diagramSource)
 if (!parsed.ok) throw new Error('src/takesix.takesix.json is not a valid takesix document: run npm run validate')
@@ -122,6 +123,7 @@ export function App() {
         <div className="demo-view">
           <TakeSix document={diagram} />
         </div>
+        <DiagramOutline document={diagram} />
       </section>
     </main>
   )

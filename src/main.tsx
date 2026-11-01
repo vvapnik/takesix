@@ -1,12 +1,16 @@
 import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import { createRoot, hydrateRoot } from 'react-dom/client'
 import '@takesix/react/style.css'
 import './base.css'
 import './site.css'
 import { App } from './App'
 
-createRoot(document.getElementById('root')!).render(
+const root = document.getElementById('root')!
+const app = (
   <StrictMode>
     <App />
-  </StrictMode>,
+  </StrictMode>
 )
+// The built page arrives prerendered (scripts/prerender.mjs); the dev server sends it empty.
+if (root.hasChildNodes()) hydrateRoot(root, app)
+else createRoot(root).render(app)

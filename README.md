@@ -27,11 +27,17 @@ Node 24 LTS (`.nvmrc`).
 npm install
 npm run dev        # http://localhost:5173/ and /editor/
 npm run validate   # check the diagram in src/takesix.takesix.json
-npm run build      # static site in dist/
+npm run build      # static site in dist/, landing page prerendered
 ```
 
 The diagram on the second screen is `src/takesix.takesix.json`; edit it and
 run `npm run validate`.
+
+The build prerenders the landing page (`src/entry-server.tsx`,
+`scripts/prerender.mjs`), so its text, including a text version of the whole
+diagram, is in the HTML for search engines and AI crawlers that do not run
+JavaScript. The browser then hydrates it. `public/robots.txt` welcomes AI
+crawlers by name; `public/sitemap.xml` lists the pages.
 
 Every push to `main` builds the site and deploys it to GitHub Pages
 (`.github/workflows/pages.yml`). Pages must use "GitHub Actions" as its source
