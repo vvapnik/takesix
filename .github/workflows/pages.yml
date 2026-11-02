@@ -45,3 +45,16 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+      # IndexNow tells Bing (and through it ChatGPT search and Copilot), Yandex
+      # and others that the pages changed. The key is public by design: the
+      # site serves it from public/<key>.txt. A failure does not fail the deploy.
+      - name: Notify search engines (IndexNow)
+        continue-on-error: true
+        env:
+          KEY: 6af933c1897f861e6c8ad53b46ed9854
+        run: |
+          urls=$(curl -sf https://takesix.vapnik.de/sitemap.xml | grep -o '<loc>[^<]*' | sed 's/<loc>//' | jq -Rsc 'split("\n") | map(select(length > 0))')
+          jq -n --arg key "$KEY" --argjson urls "$urls" \
+            '{host: "takesix.vapnik.de", key: $key, keyLocation: "https://takesix.vapnik.de/\($key).txt", urlList: $urls}' \
+          | curl -s -o /dev/null -w "IndexNow: HTTP %{http_code}\n" -X POST https://api.indexnow.org/indexnow \
+              -H 'Content-Type: application/json; charset=utf-8' --data-binary @-

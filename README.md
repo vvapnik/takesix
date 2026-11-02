@@ -39,6 +39,15 @@ diagram, is in the HTML for search engines and AI crawlers that do not run
 JavaScript. The browser then hydrates it. `public/robots.txt` welcomes AI
 crawlers by name; `public/sitemap.xml` lists the pages.
 
+Link previews: Open Graph and Twitter tags in both pages point to
+`public/og.png` (1200×630). Its source is `og/og.html`; regenerate the image
+with `npm run og` (headless Chrome). The landing page also carries JSON-LD
+(`WebSite`, `SoftwareSourceCode`).
+
+After each deploy the workflow pings IndexNow with the URLs from the sitemap,
+so Bing, Yandex and others pick up changes right away. The key is served from
+`public/<key>.txt`.
+
 Every push to `main` builds the site and deploys it to GitHub Pages
 (`.github/workflows/pages.yml`). Pages must use "GitHub Actions" as its source
 in the repository settings. The site is served at https://takesix.vapnik.de/

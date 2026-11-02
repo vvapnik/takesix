@@ -1,0 +1,162 @@
+<!doctype html>
+<!-- Source of public/og.png, the 1200×630 preview for links in chats and
+     social networks. Regenerate with: npm run og -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        background: #f0f2f5;
+        color: #1a2332;
+        font-family: 'IBM Plex Sans', system-ui, sans-serif;
+      }
+      .page {
+        display: grid;
+        grid-template-columns: 470px minmax(0, 1fr);
+        gap: 48px;
+        height: 100%;
+        padding: 64px 64px 64px 72px;
+      }
+      .pitch {
+        display: flex;
+        flex-direction: column;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 30px;
+        font-weight: 600;
+      }
+      .brand img {
+        width: 44px;
+        height: 44px;
+      }
+      h1 {
+        margin: auto 0 22px;
+        font-size: 64px;
+        line-height: 1.02;
+        font-weight: 600;
+        letter-spacing: -0.025em;
+      }
+      p {
+        margin: 0 0 auto;
+        font-size: 24px;
+        line-height: 1.4;
+        color: #5a6a7e;
+      }
+      .site {
+        font-size: 22px;
+        font-weight: 500;
+        color: #3d6aff;
+      }
+      .grid {
+        position: relative;
+        align-self: center;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 26px;
+        padding: 26px;
+        border-radius: 22px;
+        background: #e6eaf0;
+        border: 1px solid #d0d7e2;
+      }
+      .card {
+        display: flex;
+        flex-direction: column;
+        height: 168px;
+        padding: 18px;
+        border-radius: 14px;
+        background: #fff;
+        border: 1px solid #d0d7e2;
+      }
+      .icon {
+        font-size: 26px;
+        line-height: 1;
+        margin-bottom: auto;
+      }
+      .title {
+        font-size: 20px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .desc {
+        font-size: 15px;
+        color: #5a6a7e;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .inside {
+        margin-top: 6px;
+        font-size: 14px;
+        color: #3d6aff;
+      }
+      svg {
+        position: absolute;
+        inset: 0;
+        overflow: visible;
+      }
+      svg path {
+        fill: none;
+        stroke: #3d6aff;
+        stroke-width: 2.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="pitch">
+        <div class="brand"><img src="logo.svg" alt="" />TakeSix</div>
+        <h1>Answers as diagrams, not walls of text</h1>
+        <p>An AI agent answers with a diagram you can click into: six blocks at most, details one click away.</p>
+        <div class="site">takesix.vapnik.de</div>
+      </div>
+      <div class="grid" id="grid">
+        <div class="card" data-id="cart"><span class="icon">🛒</span><span class="title">Cart</span><span class="desc">Line items</span><span class="inside">3 more inside</span></div>
+        <div class="card" data-id="api"><span class="icon">⬡</span><span class="title">Checkout</span><span class="desc">New order</span><span class="inside">4 more inside</span></div>
+        <div class="card" data-id="pay"><span class="icon">💳</span><span class="title">Payments</span><span class="desc">Card charge</span><span class="inside">5 more inside</span></div>
+        <div class="card" data-id="orders"><span class="icon">📦</span><span class="title">Orders</span><span class="desc">Order states</span><span class="inside">4 more inside</span></div>
+        <div class="card" data-id="notify"><span class="icon">✉</span><span class="title">Notify</span><span class="desc">Emails</span><span class="inside">2 more inside</span></div>
+        <div class="card" data-id="settle"><span class="icon">🏦</span><span class="title">Settlement</span><span class="desc">Payouts</span><span class="inside">3 more inside</span></div>
+        <svg id="arrows">
+          <defs>
+            <marker id="head" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" style="fill: #3d6aff; stroke: none" />
+            </marker>
+          </defs>
+        </svg>
+      </div>
+    </div>
+    <script>
+      // Arrows between neighbouring cards, measured like the site's mini demo.
+      const grid = document.getElementById('grid')
+      const svg = document.getElementById('arrows')
+      const box = id => grid.querySelector(`[data-id="${id}"]`)
+      for (const [from, to] of [['cart', 'api'], ['api', 'pay'], ['pay', 'settle']]) {
+        const a = box(from)
+        const b = box(to)
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+        const d =
+          Math.abs(a.offsetTop - b.offsetTop) < 2
+            ? `M${a.offsetLeft + a.offsetWidth + 3},${a.offsetTop + a.offsetHeight / 2} H${b.offsetLeft - 3}`
+            : `M${a.offsetLeft + a.offsetWidth / 2},${a.offsetTop + a.offsetHeight + 3} V${b.offsetTop - 3}`
+        path.setAttribute('d', d)
+        path.setAttribute('marker-end', 'url(#head)')
+        svg.appendChild(path)
+      }
+    </script>
+  </body>
+</html>
