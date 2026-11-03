@@ -31,7 +31,8 @@
   text-wrap: balance;
 }
 
-.page h2 {
+/* Not the card titles of the live diagram: they are h2 too */
+.page h2:not(.example-view *) {
   margin: 48px 0 12px;
   font-size: 1.5rem;
   line-height: 1.2;
