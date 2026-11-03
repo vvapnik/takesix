@@ -1,16 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import { createDocument, formatIssues, parseDocument, serializeDocument, type TakeSixDocument } from '@takesix/core'
 import { TakeSix, type Theme } from '@takesix/react'
-import exampleSource from '../takesix.takesix.json?raw'
+import { EXAMPLES, isExampleName } from '../examples'
 // Inlined so the logo takes the text colour (it draws with currentColor)
 import logoSvg from '../logo.svg?raw'
 
 // A manual editor with no backend: documents are opened from and saved to
 // files on the user's computer, nothing is uploaded.
 
-const example = parseDocument(exampleSource)
-if (!example.ok) throw new Error('src/takesix.takesix.json is not a valid takesix document: run npm run validate')
-const EXAMPLE = example.document
+const EXAMPLE = EXAMPLES.takesix
+
+/** ?example=architecture opens that example; anything else opens the TakeSix diagram. */
+function initialDocument(): TakeSixDocument {
+  const name = new URLSearchParams(window.location.search).get('example')
+  return isExampleName(name) ? EXAMPLES[name] : EXAMPLE
+}
 
 const THEMES: Theme[] = ['auto', 'light', 'dark']
 
@@ -21,7 +25,7 @@ function fileName(doc: TakeSixDocument): string {
 }
 
 export function Editor() {
-  const [doc, setDoc] = useState<TakeSixDocument>(EXAMPLE)
+  const [doc, setDoc] = useState<TakeSixDocument>(initialDocument)
   const [editing, setEditing] = useState(true)
   const [theme, setTheme] = useState<Theme>('auto')
   const [error, setError] = useState<string | null>(null)
@@ -104,7 +108,7 @@ export function Editor() {
       }}
     >
       <header className="toolbar">
-        <a className="brand" href="../" aria-label="TakeSix home">
+        <a className="brand" href="/" aria-label="TakeSix home">
           <span className="logo" dangerouslySetInnerHTML={{ __html: logoSvg }} />
           TakeSix
         </a>

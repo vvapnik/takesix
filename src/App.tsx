@@ -1,15 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
-import { parseDocument } from '@takesix/core'
+import { useEffect, useRef } from 'react'
 import { TakeSix } from '@takesix/react'
-import diagramSource from './takesix.takesix.json?raw'
-// Inlined so the logo takes the text colour (it draws with currentColor)
-import logoSvg from './logo.svg?raw'
 import { Stage } from './Stage'
 import { DiagramOutline } from './DiagramOutline'
+import { SiteHeader } from './shared/SiteHeader'
+import { ChevronDown } from './shared/icons'
+import { useCopy } from './shared/useCopy'
+import { EXAMPLES } from './examples'
 
-const parsed = parseDocument(diagramSource)
-if (!parsed.ok) throw new Error('src/takesix.takesix.json is not a valid takesix document: run npm run validate')
-const diagram = parsed.document
+const diagram = EXAMPLES.takesix
 
 const COMMANDS = [
   { label: 'Claude Code', text: 'claude mcp add takesix -- npx -y @takesix/mcp' },
@@ -68,23 +66,17 @@ export function App() {
   return (
     <main className="snap" ref={snapRef}>
       <section className="hero" ref={heroRef} aria-labelledby="hero-title">
-        <header className="bar">
-          <a className="brand" href="./" aria-label="TakeSix home">
-            <span className="logo" dangerouslySetInnerHTML={{ __html: logoSvg }} />
-            TakeSix
-          </a>
-          <nav className="links" aria-label="Project">
-            <a href="./editor/">Editor</a>
-            <SourceMenu />
-          </nav>
-        </header>
+        <SiteHeader />
 
         <div className="hero-body">
           <div className="pitch">
-            <h1 id="hero-title">Answers as diagrams, not walls of text</h1>
+            <div className="headline">
+              <h1 id="hero-title">Answers as diagrams, not walls of text</h1>
+              <p className="badge">Early Access</p>
+            </div>
             <p className="lead">
               TakeSix lets an AI agent answer with a diagram you can click into. The gist fits on one screen of six
-              blocks at most; every block opens into its own screen, and the long text waits in a side panel.
+              blocks at most; every block opens into its own screen, and the long text opens next to it.
             </p>
             <ul className="commands">
               {COMMANDS.map(c => (
@@ -110,11 +102,11 @@ export function App() {
         </button>
       </section>
 
-      <section className="demo" ref={demoRef} aria-label="Live TakeSix diagram">
+      <section className="demo" id="demo" ref={demoRef} aria-label="Live TakeSix diagram">
         <div className="demo-bar">
           <span>Live TakeSix diagram</span>
           <div className="demo-actions">
-            <a href="./editor/">Edit it in the editor</a>
+            <a href="/editor/">Edit it in the editor</a>
             <button type="button" onClick={() => goTo(heroRef.current)}>
               Back to top
             </button>
@@ -129,70 +121,8 @@ export function App() {
   )
 }
 
-const SOURCES = [
-  { href: `${GITHUB}/takesix-core/blob/main/FORMAT.md`, title: 'Format', note: 'The JSON specification' },
-  { href: `${GITHUB}/takesix-agent`, title: 'Agents', note: 'Agent Skill and MCP server' },
-  { href: `${GITHUB}/takesix-react`, title: 'React', note: 'Viewer and editor component' },
-  { href: `${GITHUB}/takesix`, title: 'This site', note: 'Landing page and editor' },
-]
-
-/** The source links in one dropdown; closes on Escape and on a click outside. */
-function SourceMenu() {
-  const ref = useRef<HTMLDetailsElement>(null)
-
-  useEffect(() => {
-    const menu = ref.current
-    if (!menu) return
-    const close = () => menu.removeAttribute('open')
-    const onPointer = (e: PointerEvent) => {
-      if (!menu.contains(e.target as Node)) close()
-    }
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && menu.open) {
-        close()
-        menu.querySelector('summary')?.focus()
-      }
-    }
-    document.addEventListener('pointerdown', onPointer)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('pointerdown', onPointer)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [])
-
-  return (
-    <details className="source" ref={ref}>
-      <summary>
-        Source
-        <ChevronDown />
-      </summary>
-      <ul>
-        {SOURCES.map(s => (
-          <li key={s.title}>
-            <a href={s.href}>
-              <span>{s.title}</span>
-              <small>{s.note}</small>
-            </a>
-          </li>
-        ))}
-      </ul>
-    </details>
-  )
-}
-
 function Command({ label, text }: { label: string; text: string }) {
-  const [copied, setCopied] = useState(false)
-
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1600)
-    } catch {
-      // Clipboard blocked: the command stays selectable.
-    }
-  }
+  const { copied, copy } = useCopy(text)
 
   return (
     <li className="command">
@@ -202,13 +132,5 @@ function Command({ label, text }: { label: string; text: string }) {
         {copied ? 'Copied' : 'Copy'}
       </button>
     </li>
-  )
-}
-
-function ChevronDown() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-      <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
   )
 }

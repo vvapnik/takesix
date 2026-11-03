@@ -1,0 +1,258 @@
+{
+  "takesix": "1.0",
+  "title": "SaaS web app architecture",
+  "description": "A typical web product: the request path from left to right, data and operations below. Click a block to see its parts",
+  "blocks": [
+    {
+      "id": "clients",
+      "at": "A1:A3",
+      "icon": "🖥",
+      "title": "Clients",
+      "description": "Web, mobile and partner apps",
+      "details": "Everything that talks to the product from the outside. All clients use the same public API: the web app gets no private shortcuts.",
+      "children": [
+        {
+          "id": "client-web",
+          "at": "A1:B2",
+          "icon": "◧",
+          "title": "Web app",
+          "description": "React single-page app",
+          "details": "Built and deployed to the CDN as static files. Talks to the API over HTTPS with a session cookie."
+        },
+        {
+          "id": "client-mobile",
+          "at": "E1:F2",
+          "icon": "▯",
+          "title": "Mobile apps",
+          "description": "iOS and Android",
+          "details": "Native apps with OAuth tokens. Push notifications come from the notification worker."
+        },
+        {
+          "id": "client-partners",
+          "at": "C4:D5",
+          "icon": "⇄",
+          "title": "Partner API",
+          "description": "Integrations with API keys",
+          "details": "Partners call the same REST API with an API key per workspace. Rate limits are stricter than for first-party clients."
+        }
+      ]
+    },
+    {
+      "id": "edge",
+      "at": "C1:C3",
+      "icon": "⛨",
+      "title": "Edge",
+      "description": "CDN, firewall, API gateway",
+      "details": "The only part reachable from the internet. Everything behind it lives in a private network.",
+      "children": [
+        {
+          "id": "edge-gateway",
+          "at": "E2:F4",
+          "icon": "⇶",
+          "title": "API gateway",
+          "description": "Routing, rate limits, auth check",
+          "details": "- Routes `/api/*` to the services\n- Rate limits per user and per API key\n- Rejects requests without a valid session or token, so services can trust the caller"
+        },
+        {
+          "id": "edge-cdn",
+          "at": "A1:B2",
+          "icon": "◎",
+          "title": "CDN",
+          "description": "Static files and caching",
+          "details": "Serves the web app and public images. Cache keys include the build hash, so a deploy never serves stale code."
+        },
+        {
+          "id": "edge-waf",
+          "at": "A4:B5",
+          "icon": "⛨",
+          "title": "Firewall",
+          "description": "WAF and bot protection",
+          "details": "Blocks known attack patterns and abusive bots before they reach the gateway."
+        }
+      ]
+    },
+    {
+      "id": "services",
+      "at": "E1:F2",
+      "icon": "⬡",
+      "title": "Application",
+      "description": "Services and background jobs",
+      "details": "Stateless services behind the gateway, scaled horizontally, plus the workers that run anything slow or retryable. They keep no data of their own: state lives in the data layer.",
+      "children": [
+        {
+          "id": "svc-billing",
+          "at": "A1:B2",
+          "icon": "💳",
+          "title": "Billing",
+          "description": "Plans and payments via Stripe",
+          "details": "Handles Stripe webhooks and keeps the current plan of each workspace. The core API asks it for limits."
+        },
+        {
+          "id": "svc-core",
+          "at": "D1:F2",
+          "icon": "⬡",
+          "title": "Core API",
+          "description": "Workspaces, projects, users",
+          "details": "The main REST API. Writes go to PostgreSQL in a transaction; every change also publishes an event for the workers."
+        },
+        {
+          "id": "svc-auth",
+          "at": "A4:A5",
+          "icon": "🔑",
+          "title": "Auth",
+          "description": "Sign-in, sessions, OAuth",
+          "details": "OpenID Connect with Google and GitHub, email magic links, sessions in Redis. Issues the tokens the gateway checks."
+        },
+        {
+          "id": "svc-search",
+          "at": "C4:C5",
+          "icon": "🔍",
+          "title": "Search",
+          "description": "Full-text search over projects",
+          "details": "Reads from the search index; the index is filled by a worker from core API events."
+        },
+        {
+          "id": "async",
+          "at": "E4:F5",
+          "icon": "↻",
+          "title": "Background jobs",
+          "description": "Queue, workers, scheduler: anything slow or retryable",
+          "details": "Anything slow or retryable runs here, never inside a request. The services publish events to the queue.",
+          "children": [
+            {
+              "id": "async-queue",
+              "at": "A1:B2",
+              "icon": "☰",
+              "title": "Queue",
+              "description": "Events from the services",
+              "details": "Durable queue with retries and a dead-letter queue for jobs that keep failing."
+            },
+            {
+              "id": "async-workers",
+              "at": "E1:F2",
+              "icon": "⚙",
+              "title": "Workers",
+              "description": "Emails, exports, indexing",
+              "details": "- Sends emails and push notifications\n- Builds CSV and PDF exports\n- Updates the search index"
+            },
+            {
+              "id": "async-cron",
+              "at": "A4:B5",
+              "icon": "⏱",
+              "title": "Scheduler",
+              "description": "Nightly and hourly jobs",
+              "details": "Cleans up expired sessions, sends digests, reconciles billing with Stripe."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ops",
+      "at": "A5:C6",
+      "icon": "📈",
+      "title": "Operations",
+      "description": "Logs, metrics, alerts and deploys for every layer",
+      "details": "Watches every layer above. Not on the request path, so it is not linked to them.",
+      "children": [
+        {
+          "id": "ops-observe",
+          "at": "A1:B2",
+          "icon": "📈",
+          "title": "Observability",
+          "description": "Logs, metrics, traces, alerts",
+          "details": "Structured logs, metrics with alerts on error rate and latency, distributed traces across the gateway and services."
+        },
+        {
+          "id": "ops-ci",
+          "at": "E1:F2",
+          "icon": "🚀",
+          "title": "CI/CD",
+          "description": "Tests, builds, deploys",
+          "details": "Every merge to main runs tests, builds images and deploys to staging; production deploys are one click."
+        },
+        {
+          "id": "ops-infra",
+          "at": "C4:D5",
+          "icon": "🧱",
+          "title": "Infrastructure as code",
+          "description": "Environments from code",
+          "details": "Networks, databases and services are described in code and reviewed like any other change."
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "at": "E4:F6",
+      "icon": "🗄",
+      "title": "Data",
+      "description": "PostgreSQL, Redis, files",
+      "details": "The only stateful layer. Backed up nightly; the database has a hot replica for reads and failover.",
+      "children": [
+        {
+          "id": "data-pg",
+          "at": "A1:B2",
+          "icon": "🐘",
+          "title": "PostgreSQL",
+          "description": "Primary and read replica",
+          "details": "Source of truth for workspaces, projects, users and billing state. Point-in-time recovery for 14 days."
+        },
+        {
+          "id": "data-redis",
+          "at": "E1:F2",
+          "icon": "⚡",
+          "title": "Redis",
+          "description": "Cache and sessions",
+          "details": "Short-lived data only: losing it logs users out, nothing more."
+        },
+        {
+          "id": "data-files",
+          "at": "A4:B5",
+          "icon": "🗂",
+          "title": "Object storage",
+          "description": "Uploads and exports",
+          "details": "S3-compatible bucket. Files are served through signed URLs that expire after an hour."
+        },
+        {
+          "id": "data-index",
+          "at": "E4:F5",
+          "icon": "🔍",
+          "title": "Search index",
+          "description": "Rebuilt from events",
+          "details": "Can be dropped and rebuilt from PostgreSQL at any time."
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "clients",
+      "to": "edge",
+      "label": "HTTPS"
+    },
+    {
+      "from": "edge",
+      "to": "services",
+      "label": "REST"
+    },
+    {
+      "from": "services",
+      "to": "data",
+      "label": "SQL"
+    },
+    {
+      "from": "svc-billing",
+      "to": "svc-core",
+      "label": "plan"
+    },
+    {
+      "from": "async-cron",
+      "to": "async-queue",
+      "label": "jobs"
+    },
+    {
+      "from": "async-queue",
+      "to": "async-workers"
+    }
+  ]
+}

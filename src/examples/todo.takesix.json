@@ -1,0 +1,192 @@
+{
+  "takesix": "1.0",
+  "title": "Launch a new website: to-do list",
+  "description": "Five stages from idea to the first month after launch. ✅ done, ⏳ in progress, ○ not started",
+  "blocks": [
+    {
+      "id": "plan",
+      "at": "A1:A3",
+      "icon": "✅",
+      "title": "1. Plan",
+      "description": "Done: goal, audience, sitemap, date",
+      "children": [
+        {
+          "id": "plan-goal",
+          "at": "A1:B2",
+          "icon": "✅",
+          "title": "Goal and audience",
+          "description": "Who the site is for and what they should do",
+          "details": "Main action: sign up for the beta. Secondary: read the docs."
+        },
+        {
+          "id": "plan-sitemap",
+          "at": "E1:F2",
+          "icon": "✅",
+          "title": "Sitemap",
+          "description": "Home, pricing, docs, blog"
+        },
+        {
+          "id": "plan-date",
+          "at": "C4:D5",
+          "icon": "✅",
+          "title": "Launch date",
+          "description": "Fixed, with a week of buffer"
+        }
+      ]
+    },
+    {
+      "id": "content",
+      "at": "C1:C3",
+      "icon": "⏳",
+      "title": "2. Content",
+      "description": "Texts ready; screenshots and video not yet",
+      "children": [
+        {
+          "id": "content-copy",
+          "at": "A1:B2",
+          "icon": "✅",
+          "title": "Page copy",
+          "description": "Home and pricing texts"
+        },
+        {
+          "id": "content-shots",
+          "at": "E1:F2",
+          "icon": "⏳",
+          "title": "Screenshots",
+          "description": "Four of six done",
+          "details": "Missing: the settings page and the mobile view."
+        },
+        {
+          "id": "content-video",
+          "at": "A4:B5",
+          "icon": "○",
+          "title": "Demo video",
+          "description": "60 seconds, no voice-over"
+        },
+        {
+          "id": "content-legal",
+          "at": "E4:F5",
+          "icon": "○",
+          "title": "Legal pages",
+          "description": "Privacy policy and imprint",
+          "details": "Needed before launch in the EU. Check which analytics and cookies the site uses first."
+        }
+      ]
+    },
+    {
+      "id": "build",
+      "at": "E1:F3",
+      "icon": "⏳",
+      "title": "3. Build",
+      "description": "Design done, pages half built",
+      "children": [
+        {
+          "id": "build-design",
+          "at": "A1:B2",
+          "icon": "✅",
+          "title": "Design",
+          "description": "Approved mockups for all pages"
+        },
+        {
+          "id": "build-pages",
+          "at": "E1:F2",
+          "icon": "⏳",
+          "title": "Pages",
+          "description": "Home and pricing built, docs and blog next"
+        },
+        {
+          "id": "build-forms",
+          "at": "C3:D4",
+          "icon": "○",
+          "title": "Sign-up form",
+          "description": "Connected to the mailing list"
+        },
+        {
+          "id": "build-seo",
+          "at": "A5:B6",
+          "icon": "○",
+          "title": "SEO basics",
+          "description": "Titles, previews, sitemap, robots.txt"
+        },
+        {
+          "id": "build-speed",
+          "at": "E5:F6",
+          "icon": "○",
+          "title": "Speed check",
+          "description": "Under 2 s on a mid-range phone"
+        }
+      ]
+    },
+    {
+      "id": "launch",
+      "at": "B4:C6",
+      "icon": "○",
+      "title": "4. Launch",
+      "description": "Not started: domain, analytics, announcement",
+      "children": [
+        {
+          "id": "launch-domain",
+          "at": "A1:B2",
+          "icon": "○",
+          "title": "Domain and HTTPS",
+          "description": "DNS, certificate, redirects"
+        },
+        {
+          "id": "launch-analytics",
+          "at": "E1:F2",
+          "icon": "○",
+          "title": "Analytics",
+          "description": "Cookieless counter, goals"
+        },
+        {
+          "id": "launch-announce",
+          "at": "C4:D5",
+          "icon": "○",
+          "title": "Announcement",
+          "description": "Email to the waiting list"
+        }
+      ]
+    },
+    {
+      "id": "after",
+      "at": "E4:F6",
+      "icon": "○",
+      "title": "5. First month",
+      "description": "Not started: watch the numbers, fix what hurts",
+      "children": [
+        {
+          "id": "after-numbers",
+          "at": "A2:B3",
+          "icon": "○",
+          "title": "Weekly numbers",
+          "description": "Visits, sign-ups, sources"
+        },
+        {
+          "id": "after-feedback",
+          "at": "E2:F3",
+          "icon": "○",
+          "title": "Feedback",
+          "description": "Five calls with first users"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "plan",
+      "to": "content"
+    },
+    {
+      "from": "content",
+      "to": "build"
+    },
+    {
+      "from": "build",
+      "to": "launch"
+    },
+    {
+      "from": "launch",
+      "to": "after"
+    }
+  ]
+}

@@ -7,6 +7,11 @@ answers as diagrams, not walls of text.
   with install commands and a looping mini demo on top, a live TakeSix diagram
   about TakeSix below, rendered with
   [`@takesix/react`](https://github.com/vvapnik/takesix-react).
+- **Examples** (`examples/architecture/`, `examples/todo/`): a live diagram
+  with a text version, a link to open it in the editor and the prompt to get
+  one like it from an agent. The diagrams are in `src/examples/`.
+- **Guide** (`agents/`): how to connect TakeSix to Claude Code, Claude
+  Desktop, Codex, Cursor, VS Code and other MCP clients.
 - **Editor** (`editor/index.html`, served at `/editor/`): open a
   `.takesix.json` file (button or drag and drop), edit it, save it back. No
   backend: nothing leaves the browser.
@@ -25,15 +30,20 @@ Node 24 LTS (`.nvmrc`).
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173/ and /editor/
-npm run validate   # check the diagram in src/takesix.takesix.json
+npm run dev        # http://localhost:5173/, /examples/…, /agents/, /editor/
+npm run validate   # check the site's diagrams
 npm run build      # static site in dist/, landing page prerendered
 ```
 
-The diagram on the second screen is `src/takesix.takesix.json`; edit it and
-run `npm run validate`.
+The diagram on the home page is `src/takesix.takesix.json`, the examples are
+in `src/examples/`; edit them and run `npm run validate`. The editor opens any
+of them with `/editor/?example=<name>`.
 
-The build prerenders the landing page (`src/entry-server.tsx`,
+Each page is an HTML file with its own entry in `src/entries/`; a new page
+also needs a line in `vite.config.ts`, `src/entry-server.tsx` and
+`public/sitemap.xml`.
+
+The build prerenders every page except the editor (`src/entry-server.tsx`,
 `scripts/prerender.mjs`), so its text, including a text version of the whole
 diagram, is in the HTML for search engines and AI crawlers that do not run
 JavaScript. The browser then hydrates it. `public/robots.txt` welcomes AI

@@ -1,0 +1,118 @@
+/* The site header: brand on the left, navigation with two dropdowns on the
+   right. Shared by every page. */
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: 72px;
+  flex: none;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+}
+
+.logo,
+.logo svg {
+  display: block;
+  width: 30px;
+  height: 30px;
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  font-size: 0.94rem;
+}
+
+.links > a,
+.menu summary {
+  color: var(--ink-2);
+  text-decoration: none;
+}
+
+.links > a:hover,
+.menu summary:hover,
+.menu[open] summary {
+  color: var(--ink);
+}
+
+.menu {
+  position: relative;
+}
+
+.menu summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.menu summary svg {
+  width: 15px;
+  height: 15px;
+  transition: transform 0.15s;
+}
+
+.menu[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.menu ul {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  z-index: 10;
+  min-width: 15rem;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgb(26 35 50 / 0.12);
+}
+
+.menu a {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.menu a:hover {
+  background: var(--bg);
+}
+
+.menu a span {
+  font-weight: 500;
+}
+
+.menu a small {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+}
+
+@media (max-width: 640px) {
+  .links {
+    gap: 16px;
+  }
+
+  .brand-name {
+    display: none;
+  }
+}

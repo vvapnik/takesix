@@ -1,3 +1,9 @@
+/* The landing page scrolls inside .snap, not the page itself. */
+html,
+body {
+  overflow: hidden;
+}
+
 /* Two screens; scrolling always settles on one of them. */
 .snap {
   height: 100dvh;
@@ -21,113 +27,6 @@
   padding: 0 clamp(16px, 5vw, 72px);
 }
 
-.bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  height: 72px;
-  flex: none;
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 600;
-  font-size: 1.1rem;
-  text-decoration: none;
-}
-
-.logo,
-.logo svg {
-  display: block;
-  width: 30px;
-  height: 30px;
-}
-
-.links {
-  display: flex;
-  align-items: center;
-  gap: 28px;
-  font-size: 0.94rem;
-}
-
-.links > a,
-.source summary {
-  color: var(--ink-2);
-  text-decoration: none;
-}
-
-.links > a:hover,
-.source summary:hover,
-.source[open] summary {
-  color: var(--ink);
-}
-
-.source {
-  position: relative;
-}
-
-.source summary {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  list-style: none;
-  user-select: none;
-}
-
-.source summary::-webkit-details-marker {
-  display: none;
-}
-
-.source summary svg {
-  width: 15px;
-  height: 15px;
-  transition: transform 0.15s;
-}
-
-.source[open] summary svg {
-  transform: rotate(180deg);
-}
-
-.source ul {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 10px);
-  z-index: 10;
-  min-width: 15rem;
-  margin: 0;
-  padding: 6px;
-  list-style: none;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgb(26 35 50 / 0.12);
-}
-
-.source a {
-  display: flex;
-  flex-direction: column;
-  padding: 8px 10px;
-  border-radius: 6px;
-  text-decoration: none;
-}
-
-.source a:hover {
-  background: var(--bg);
-}
-
-.source a span {
-  font-weight: 500;
-}
-
-.source a small {
-  font-size: 0.8rem;
-  color: var(--ink-3);
-}
-
 .hero-body {
   flex: 1;
   display: grid;
@@ -144,8 +43,56 @@
   max-width: 36rem;
 }
 
-.pitch h1 {
+/* The title with the badge in the free space to its right, towards the demo.
+   The title keeps three lines at any size; the badge hangs past its edge. */
+.headline {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
   margin: 0 0 24px;
+}
+
+.headline h1 {
+  width: 6.3em;
+  max-width: 100%;
+}
+
+/* Before 1.0: the format and the libraries may still change */
+.badge {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 24px);
+  margin: 0.9em 0 0;
+  padding: 4px 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* No room beside the title: the badge goes above it */
+@media (max-width: 1260px) {
+  .headline {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .badge {
+    position: static;
+    margin: 0;
+  }
+}
+
+.pitch h1 {
+  margin: 0;
   font-size: clamp(2.5rem, min(5.2vw, 8.5vh), 4.4rem);
   line-height: 1.02;
   font-weight: 600;
@@ -290,13 +237,51 @@
 
 .answer {
   position: relative;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 7 / 5;
   /* on short windows the stage gives up height before the page overflows */
   max-height: max(280px, calc(100dvh - 340px));
   border-radius: 14px;
   background: var(--sunken);
   border: 1px solid var(--line);
   overflow: hidden;
+  container-type: inline-size;
+}
+
+/* A narrow demo, like TakeSix on a phone: cards keep icon, title and
+   "N more inside", the gaps narrow. */
+@container (max-width: 600px) {
+  .answer .six {
+    padding: 14px;
+    gap: 7% 18px;
+  }
+
+  .answer .six li {
+    padding: 8px 10px;
+  }
+
+  .answer .six-desc {
+    display: none;
+  }
+
+  .answer .six-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .answer .six-icon {
+    font-size: 0.9rem;
+  }
+
+  .answer .six-title {
+    max-width: 100%;
+    font-size: 0.82rem;
+    line-height: 1.2;
+  }
+
+  .answer .six-inside {
+    white-space: nowrap;
+  }
 }
 
 /* The long answer. Timeline of the opening: the text scrolls through about
@@ -410,9 +395,10 @@
   padding: 18px;
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
+  /* Wide gaps: linked blocks keep space between them, as in TakeSix */
+  gap: 8% 36px;
 }
 
 .inner .six {
@@ -598,8 +584,9 @@
 .six li {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 2px;
-  padding: 14px;
+  padding: 10px 14px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -608,24 +595,35 @@
   animation: block-in 0.5s calc(4.1s + var(--i) * 0.08s) cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
 }
 
+.six-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .six-icon {
-  font-size: 1.15rem;
+  flex: none;
+  font-size: 1rem;
   line-height: 1;
-  margin-bottom: auto;
 }
 
 .six-title {
   font-weight: 600;
   font-size: 0.95rem;
-  margin-top: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .six-desc {
   font-size: 0.8rem;
+  line-height: 1.3;
   color: var(--ink-2);
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .six-inside {
@@ -742,7 +740,7 @@
     padding: 4px 0;
   }
 
-  .pitch h1 {
+  .headline {
     margin-bottom: 16px;
   }
 
@@ -770,10 +768,6 @@
 }
 
 @media (max-width: 560px) {
-  .links {
-    gap: 20px;
-  }
-
   .command {
     grid-template-columns: minmax(0, 1fr) auto;
   }

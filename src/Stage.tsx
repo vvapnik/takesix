@@ -3,44 +3,68 @@ import { WallText } from './WallText'
 
 // The hero's one moment: a long text answer collapses into the six blocks a
 // TakeSix answer would show instead, then one block opens into its own screen.
+// Like a TakeSix level, the blocks sit on a grid with empty cells between
+// them, laid out as a tree that reads from the top left.
 
 const QUESTION = 'Explain how our checkout works'
 
 interface Card {
   id: string
+  /** Column and row on the level's grid, from 1 */
+  at: [number, number]
   icon: string
   title: string
   description: string
   inside?: number
 }
 
-const SIX: Card[] = [
-  { id: 'cart', icon: '🛒', title: 'Cart', description: 'Items, discounts, totals', inside: 3 },
-  { id: 'api', icon: '⬡', title: 'Checkout API', description: 'Creates the order', inside: 4 },
-  { id: 'payments', icon: '💳', title: 'Payments', description: 'Charges via the provider', inside: 5 },
-  { id: 'orders', icon: '📦', title: 'Orders', description: 'Pending to shipped', inside: 4 },
-  { id: 'notify', icon: '✉', title: 'Notifications', description: 'Emails and webhooks', inside: 2 },
-  { id: 'settle', icon: '🏦', title: 'Settlement', description: 'Nightly reconciliation', inside: 3 },
-]
-const SIX_LINKS: [string, string][] = [
-  ['cart', 'api'],
-  ['api', 'payments'],
-  ['payments', 'settle'],
-]
+/** A level: its grid size, its blocks and the arrows between them. */
+interface Level {
+  cols: number
+  rows: number
+  cards: Card[]
+  links: [string, string][]
+}
 
-const ZOOMED = SIX[2]!
-const INSIDE: Card[] = [
-  { id: 'charges', icon: '⚡', title: 'Charges', description: 'One per order' },
-  { id: 'secure', icon: '🔒', title: '3-D Secure', description: 'Redirect and callback' },
-  { id: 'provider', icon: '⇄', title: 'Provider', description: 'Adapter to the PSP' },
-  { id: 'retries', icon: '↻', title: 'Retries', description: 'Twice, with backoff' },
-  { id: 'refunds', icon: '↩', title: 'Refunds', description: 'Credit notes' },
-]
-const INSIDE_LINKS: [string, string][] = [
-  ['charges', 'secure'],
-  ['secure', 'provider'],
-  ['charges', 'retries'],
-]
+// Cart → Checkout API, which branches into Payments → Settlement and
+// Orders → Notifications. In reading order, so the cards come in that way.
+const SIX: Level = {
+  cols: 3,
+  rows: 3,
+  cards: [
+    { id: 'cart', at: [1, 1], icon: '🛒', title: 'Cart', description: 'Items, discounts, totals', inside: 3 },
+    { id: 'api', at: [2, 1], icon: '⬡', title: 'Checkout API', description: 'Creates the order', inside: 4 },
+    { id: 'payments', at: [3, 1], icon: '💳', title: 'Payments', description: 'Charges via the provider', inside: 5 },
+    { id: 'orders', at: [2, 2], icon: '📦', title: 'Orders', description: 'Pending to shipped', inside: 4 },
+    { id: 'settle', at: [3, 2], icon: '🏦', title: 'Settlement', description: 'Nightly reconciliation', inside: 3 },
+    { id: 'notify', at: [2, 3], icon: '✉', title: 'Notifications', description: 'Emails and webhooks', inside: 2 },
+  ],
+  links: [
+    ['cart', 'api'],
+    ['api', 'payments'],
+    ['api', 'orders'],
+    ['payments', 'settle'],
+    ['orders', 'notify'],
+  ],
+}
+
+const ZOOMED = SIX.cards[2]!
+const INSIDE: Level = {
+  cols: 3,
+  rows: 2,
+  cards: [
+    { id: 'charges', at: [1, 1], icon: '⚡', title: 'Charges', description: 'One per order' },
+    { id: 'secure', at: [2, 1], icon: '🔒', title: '3-D Secure', description: 'Redirect and callback' },
+    { id: 'provider', at: [3, 1], icon: '⇄', title: 'Provider', description: 'Adapter to the PSP' },
+    { id: 'retries', at: [1, 2], icon: '↻', title: 'Retries', description: 'Twice, with backoff' },
+    { id: 'refunds', at: [3, 2], icon: '↩', title: 'Refunds', description: 'Credit notes' },
+  ],
+  links: [
+    ['charges', 'secure'],
+    ['secure', 'provider'],
+    ['charges', 'retries'],
+  ],
+}
 
 /** The loop, in ms. A fake cursor drives it: it moves to a card, turns into a
     magnifier, clicks to zoom in, then clicks the breadcrumb to zoom out. */
@@ -235,16 +259,12 @@ function Answer() {
         ref={outerRef}
         onAnimationEnd={e => {
           // No animation runs under reduced motion, so the loop never starts.
-          const last = SIX[SIX.length - 1]!.id
+          const last = SIX.cards[SIX.cards.length - 1]!.id
           if (e.animationName === 'block-in' && (e.target as HTMLElement).dataset.id === last) setReady(true)
         }}
       >
-        <ul className="six">
-          {SIX.map((b, i) => (
-            <StageCard key={b.id} card={b} index={i} />
-          ))}
-        </ul>
-        <Arrows links={SIX_LINKS} />
+        <Cards level={SIX} />
+        <Arrows links={SIX.links} />
       </div>
 
       {zoomStyle && (
@@ -304,23 +324,33 @@ function FakeCursor({ cursor }: { cursor: Cursor }) {
 function InnerLevel() {
   return (
     <div className="level inner">
-      <ul className="six">
-        {INSIDE.map((b, i) => (
-          <StageCard key={b.id} card={b} index={i} />
-        ))}
-      </ul>
-      <Arrows links={INSIDE_LINKS} />
+      <Cards level={INSIDE} />
+      <Arrows links={INSIDE.links} />
     </div>
   )
 }
 
-function StageCard({ card, index }: { card: Card; index: number }) {
+function Cards({ level }: { level: Level }) {
+  const grid = { '--cols': level.cols, '--rows': level.rows } as CSSProperties
   return (
-    <li data-id={card.id} style={{ '--i': index } as CSSProperties}>
-      <span className="six-icon" aria-hidden="true">
-        {card.icon}
+    <ul className="six" style={grid}>
+      {level.cards.map((b, i) => (
+        <StageCard key={b.id} card={b} index={i} />
+      ))}
+    </ul>
+  )
+}
+
+function StageCard({ card, index }: { card: Card; index: number }) {
+  const [col, row] = card.at
+  return (
+    <li data-id={card.id} style={{ '--i': index, gridColumn: col, gridRow: row } as CSSProperties}>
+      <span className="six-head">
+        <span className="six-icon" aria-hidden="true">
+          {card.icon}
+        </span>
+        <span className="six-title">{card.title}</span>
       </span>
-      <span className="six-title">{card.title}</span>
       <span className="six-desc">{card.description}</span>
       {card.inside !== undefined && <span className="six-inside">{card.inside} more inside</span>}
     </li>

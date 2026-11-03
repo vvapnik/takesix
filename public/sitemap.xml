@@ -4,6 +4,15 @@
     <loc>https://takesix.vapnik.de/</loc>
   </url>
   <url>
+    <loc>https://takesix.vapnik.de/agents/</loc>
+  </url>
+  <url>
+    <loc>https://takesix.vapnik.de/examples/architecture/</loc>
+  </url>
+  <url>
+    <loc>https://takesix.vapnik.de/examples/todo/</loc>
+  </url>
+  <url>
     <loc>https://takesix.vapnik.de/editor/</loc>
   </url>
 </urlset>
