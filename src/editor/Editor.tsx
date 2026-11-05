@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { createDocument, formatIssues, parseDocument, serializeDocument, type TakeSixDocument } from '@takesix/core'
-import { TakeSix, type Theme } from '@takesix/react'
+import { readDocumentFromHash, TakeSix, type Theme } from '@takesix/react'
 import { EXAMPLES, isExampleName } from '../examples'
 // Inlined so the logo takes the text colour (it draws with currentColor)
 import logoSvg from '../logo.svg?raw'
 
 // A manual editor with no backend: documents are opened from and saved to
-// files on the user's computer, nothing is uploaded.
+// files on the user's computer, nothing is uploaded. "Open in editor" in a
+// viewer passes the document in the URL fragment (#takesix=...), which stays
+// in the browser too.
 
 const EXAMPLE = EXAMPLES.takesix
 
@@ -74,6 +76,26 @@ export function Editor() {
     setDoc(next)
     setDirty(true)
   }
+
+  // A document passed in the URL fragment: open it, then drop the fragment
+  // from the address bar, it can be long. Edits are saved with Save as usual.
+  useEffect(() => {
+    if (!window.location.hash) return
+    let current = true
+    readDocumentFromHash(window.location.hash).then(
+      data => {
+        if (!current || data === undefined) return
+        history.replaceState(null, '', window.location.pathname + window.location.search)
+        const result = parseDocument(data)
+        if (result.ok) load(result.document)
+        else setError(`The linked diagram is not a valid TakeSix document:\n${formatIssues(result.issues)}`)
+      },
+      () => { if (current) setError('The link is damaged: the diagram in it could not be read.') },
+    )
+    return () => { current = false }
+    // Once, on opening the page
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // The page chrome follows the same theme as the diagram.
   useEffect(() => {
