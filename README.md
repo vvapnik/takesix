@@ -12,6 +12,8 @@ answers as diagrams, not walls of text.
   one like it from an agent. The diagrams are in `src/examples/`.
 - **Guide** (`agents/`): how to connect TakeSix to Claude Code, Claude
   Desktop, Codex, Cursor, VS Code and other MCP clients.
+- **Format** (`format/`): the JSON format in plain words, with grid pictures
+  drawn in CSS. `FORMAT.md` in takesix-core stays the exact specification.
 - **Editor** (`editor/index.html`, served at `/editor/`): open a
   `.takesix.json` file (button or drag and drop), edit it, save it back. No
   backend: nothing leaves the browser.
@@ -30,7 +32,7 @@ Node 24 LTS (`.nvmrc`).
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173/, /examples/…, /agents/, /editor/
+npm run dev        # http://localhost:5173/, /examples/…, /agents/, /format/, /editor/
 npm run validate   # check the site's diagrams
 npm run build      # static site in dist/, landing page prerendered
 ```

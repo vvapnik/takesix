@@ -4,7 +4,7 @@ import { defineConfig } from 'vite'
 
 // Served from https://takesix.vapnik.de/ (vvapnik.github.io/takesix/ redirects
 // there). Relative asset paths work at the domain root and under /takesix/ alike.
-// Pages: the landing page, the editor, the examples and the agent guide.
+// Pages: the landing page, the editor, the examples, the agent guide and the format.
 export default defineConfig({
   base: './',
   plugins: [react()],
@@ -16,6 +16,7 @@ export default defineConfig({
         architecture: resolve(import.meta.dirname, 'examples/architecture/index.html'),
         todo: resolve(import.meta.dirname, 'examples/todo/index.html'),
         agents: resolve(import.meta.dirname, 'agents/index.html'),
+        format: resolve(import.meta.dirname, 'format/index.html'),
       },
     },
   },

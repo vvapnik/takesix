@@ -14,8 +14,6 @@ const COMMANDS = [
   { label: 'Codex', text: 'codex mcp add takesix -- npx -y @takesix/mcp' },
 ]
 
-const GITHUB = 'https://github.com/vvapnik'
-
 function scrollBehavior(): ScrollBehavior {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
 }
@@ -87,7 +85,7 @@ export function App() {
               <button type="button" className="primary" onClick={() => goTo(demoRef.current)}>
                 Open the diagram
               </button>
-              <a className="secondary" href={`${GITHUB}/takesix-core/blob/main/FORMAT.md`}>
+              <a className="secondary" href="/format/">
                 Read the format
               </a>
             </div>
