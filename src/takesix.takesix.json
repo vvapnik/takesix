@@ -9,7 +9,6 @@
       "icon": "◆",
       "title": "The idea",
       "description": "Answers as diagrams you click into, not pages of prose. Click me, more inside",
-      "details": "Ask an agent to explain a codebase, a spec or a plan and you usually get many screens of headings and bullet lists. TakeSix turns that answer into a tree: the whole thing fits on the first screen, and each part opens into its own screen.",
       "children": [
         {
           "id": "idea-six",
@@ -25,7 +24,7 @@
           "icon": "↘",
           "title": "Depth on demand",
           "description": "The gist first, details one click away",
-          "details": "Cards show a title and one line. Click to open a block, use the breadcrumb to go back. Long explanations, code and lists open in a Markdown popup next to the block."
+          "details": "Cards show a title and one line. Click to open a block, use the breadcrumb to go back. A block with long explanations, code or lists opens into that text instead, in Markdown."
         },
         {
           "id": "idea-checked",
@@ -43,7 +42,6 @@
       "icon": "🤖",
       "title": "For agents",
       "description": "Skill, MCP server",
-      "details": "Both teach the agent the same rules for readable diagrams, check the result and render it.",
       "children": [
         {
           "id": "agents-skill",
@@ -77,7 +75,6 @@
       "icon": "{ }",
       "title": "The format",
       "description": "JSON on a 6×6 grid",
-      "details": "```json\n{\n  \"takesix\": \"1.0\",\n  \"title\": \"Payments\",\n  \"blocks\": [\n    { \"id\": \"api\", \"title\": \"API\", \"at\": \"A1:B2\" },\n    { \"id\": \"bank\", \"title\": \"Bank\", \"at\": \"E1:F2\" }\n  ],\n  \"links\": [{ \"from\": \"api\", \"to\": \"bank\" }]\n}\n```\nFull specification: [FORMAT.md](https://github.com/vvapnik/takesix-core/blob/main/FORMAT.md)",
       "children": [
         {
           "id": "format-block",
@@ -85,7 +82,7 @@
           "icon": "▢",
           "title": "Block",
           "description": "id, title, place, up to six children",
-          "details": "Besides `id`, `title` and `at`: `icon`, a one-line `description`, `details` (Markdown that opens next to the block), `children` and `meta` for data of other tools. Ids are stable, so links and comments can rely on them."
+          "details": "Besides `id`, `title` and `at`: `icon`, a one-line `description`, either `children` or `details` (Markdown text the block opens into instead) and `meta` for data of other tools. Ids are stable, so links and comments can rely on them.\n\n```json\n{\n  \"takesix\": \"1.0\",\n  \"title\": \"Payments\",\n  \"blocks\": [\n    { \"id\": \"api\", \"title\": \"API\", \"at\": \"A1:B2\" },\n    { \"id\": \"bank\", \"title\": \"Bank\", \"at\": \"E1:F2\" }\n  ],\n  \"links\": [{ \"from\": \"api\", \"to\": \"bank\" }]\n}\n```\nFull specification: [FORMAT.md](https://github.com/vvapnik/takesix-core/blob/main/FORMAT.md)"
         },
         {
           "id": "format-grid",
@@ -100,8 +97,8 @@
           "at": "E3:F3",
           "icon": "↗",
           "title": "Link",
-          "description": "Between any two blocks, on any levels",
-          "details": "`from`, `to`, an optional `label` and `direction`. A link between nested blocks also shows one level up, as an arrow between their parents."
+          "description": "Between the blocks of one screen",
+          "details": "`from`, `to`, an optional `label`, `direction` and line `style`. Both ends are blocks of one screen: to connect parts deeper inside, link the blocks that hold them."
         }
       ]
     },
@@ -111,7 +108,6 @@
       "icon": "▣",
       "title": "For apps",
       "description": "React components",
-      "details": "```\nnpm install @takesix/react\n```",
       "children": [
         {
           "id": "apps-react",
@@ -119,7 +115,7 @@
           "icon": "⬡",
           "title": "@takesix/react",
           "description": "One component: view, or edit with onChange",
-          "details": "```tsx\nimport { TakeSix } from '@takesix/react'\nimport '@takesix/react/style.css'\n\n<TakeSix document={doc} onChange={setDoc} editing />\n```\nLight and dark themes, drag and drop, grouping, phones. This page uses it."
+          "details": "```\nnpm install @takesix/react\n```\n```tsx\nimport { TakeSix } from '@takesix/react'\nimport '@takesix/react/style.css'\n\n<TakeSix document={doc} onChange={setDoc} editing />\n```\nLight and dark themes, drag and drop, grouping, phones. This page uses it."
         },
         {
           "id": "apps-core",

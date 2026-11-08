@@ -9,7 +9,6 @@
       "icon": "🖥",
       "title": "Clients",
       "description": "Web, mobile and partner apps",
-      "details": "Everything that talks to the product from the outside. All clients use the same public API: the web app gets no private shortcuts.",
       "children": [
         {
           "id": "client-web",
@@ -17,7 +16,7 @@
           "icon": "◧",
           "title": "Web app",
           "description": "React single-page app",
-          "details": "Built and deployed to the CDN as static files. Talks to the API over HTTPS with a session cookie."
+          "details": "Built and deployed to the CDN as static files. Talks to the API over HTTPS with a session cookie. It uses the same public API as every other client, with no private shortcuts."
         },
         {
           "id": "client-mobile",
@@ -49,7 +48,6 @@
           "icon": "⛨",
           "title": "Edge",
           "description": "CDN, firewall, API gateway",
-          "details": "The only part reachable from the internet. Everything behind it lives in a private network.",
           "children": [
             {
               "id": "edge-cdn",
@@ -73,7 +71,7 @@
               "icon": "⇶",
               "title": "API gateway",
               "description": "Routing, rate limits, auth check",
-              "details": "- Routes `/api/*` to the services\n- Rate limits per user and per API key\n- Rejects requests without a valid session or token, so services can trust the caller"
+              "details": "The only way in from the internet: everything behind it lives in a private network.\n\n- Routes `/api/*` to the services\n- Rate limits per user and per API key\n- Rejects requests without a valid session or token, so services can trust the caller"
             }
           ]
         },
@@ -83,7 +81,6 @@
           "icon": "⬡",
           "title": "Application",
           "description": "Services and background jobs",
-          "details": "Stateless services behind the gateway, scaled horizontally, plus the workers that run anything slow or retryable. They keep no data of their own: state lives in the data layer.",
           "children": [
             {
               "id": "svc-billing",
@@ -123,7 +120,6 @@
               "icon": "↻",
               "title": "Background jobs",
               "description": "Queue, workers, scheduler: slow or retryable work",
-              "details": "Anything slow or retryable runs here, never inside a request. The services publish events to the queue.",
               "children": [
                 {
                   "id": "async-cron",
@@ -139,7 +135,7 @@
                   "icon": "☰",
                   "title": "Queue",
                   "description": "Events from the services",
-                  "details": "Durable queue with retries and a dead-letter queue for jobs that keep failing."
+                  "details": "The services publish events here, so nothing slow runs inside a request. Durable queue with retries and a dead-letter queue for jobs that keep failing."
                 },
                 {
                   "id": "async-workers",
@@ -162,7 +158,6 @@
       "icon": "🗄",
       "title": "Data",
       "description": "PostgreSQL, Redis, files, search index",
-      "details": "The only stateful layer. Backed up nightly; the database has a hot replica for reads and failover.",
       "children": [
         {
           "id": "data-pg",
@@ -170,7 +165,7 @@
           "icon": "🐘",
           "title": "PostgreSQL",
           "description": "Primary and read replica",
-          "details": "Source of truth for workspaces, projects, users and billing state. Point-in-time recovery for 14 days."
+          "details": "Source of truth for workspaces, projects, users and billing state. Point-in-time recovery for 14 days. Backed up nightly, with a hot replica for reads and failover."
         },
         {
           "id": "data-redis",
@@ -204,7 +199,6 @@
       "icon": "📈",
       "title": "Operations",
       "description": "Logs, metrics, alerts, deploys",
-      "details": "Watches every layer above. Not on the request path, so it is not linked to them.",
       "children": [
         {
           "id": "ops-observe",
