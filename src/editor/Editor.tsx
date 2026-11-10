@@ -61,15 +61,26 @@ export function Editor() {
     if (file) open(await file.text(), file.name)
   }
 
-  function save() {
-    const blob = new Blob([serializeDocument(doc)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
+  function download(text: string, type: string, name: string) {
+    const url = URL.createObjectURL(new Blob([text], { type }))
     const a = document.createElement('a')
     a.href = url
-    a.download = fileName(doc)
+    a.download = name
     a.click()
-    URL.revokeObjectURL(url)
+    // Some browsers start the download after click() returns
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }
+
+  function save() {
+    download(serializeDocument(doc), 'application/json', fileName(doc))
     setDirty(false)
+  }
+
+  // A page that opens as the diagram on its own. The viewer inside it (~300 KB
+  // with React) is a separate chunk, loaded only when someone saves HTML.
+  async function saveHtml() {
+    const { standaloneHtml } = await import('@takesix/react/standalone')
+    download(standaloneHtml(doc), 'text/html', fileName(doc).replace(/\.takesix\.json$/, '.html'))
   }
 
   function change(next: TakeSixDocument) {
@@ -144,6 +155,9 @@ export function Editor() {
           </button>
           <button type="button" onClick={save}>
             Save{dirty ? ' •' : ''}
+          </button>
+          <button type="button" onClick={saveHtml} title="One HTML file that opens as the diagram without a server">
+            Save as HTML
           </button>
           <button type="button" onClick={() => load(EXAMPLE)}>
             Example
