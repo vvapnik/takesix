@@ -28,3 +28,5 @@ User-agent: Google-Extended
 Allow: /
 
 Sitemap: https://takesix.vapnik.de/sitemap.xml
+
+# A short text about TakeSix for language models: /llms.txt, the full one: /llms-full.txt

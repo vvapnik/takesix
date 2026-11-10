@@ -1,5 +1,10 @@
 # TakeSix site
 
+> TakeSix is an open format and libraries that let an AI agent answer with a diagram you can click into instead of a wall of text: at most six blocks per screen, and any block opens into up to six more.
+> **[takesix.vapnik.de](https://takesix.vapnik.de/)** · [FAQ](https://takesix.vapnik.de/faq/)
+
+![TakeSix: answers as diagrams, not walls of text. Six blocks of a checkout diagram with arrows.](https://takesix.vapnik.de/og.png)
+
 The landing page and live demo of [TakeSix](https://takesix.vapnik.de/):
 answers as diagrams, not walls of text.
 
@@ -14,6 +19,8 @@ answers as diagrams, not walls of text.
   Desktop, Codex, Cursor, VS Code and other MCP clients.
 - **Format** (`format/`): the JSON format in plain words, with grid pictures
   drawn in CSS. `FORMAT.md` in takesix-core stays the exact specification.
+- **FAQ** (`faq/`): what TakeSix is and how it differs from Mermaid, C4 and
+  draw.io, with `FAQPage` structured data.
 - **Editor** (`editor/index.html`, served at `/editor/`): open a
   `.takesix.json` file (button or drag and drop), edit it, save it back. No
   backend: nothing leaves the browser.
@@ -55,6 +62,13 @@ Link previews: Open Graph and Twitter tags in both pages point to
 `public/og.png` (1200×630). Its source is `og/og.html`; regenerate the image
 with `npm run og` (headless Chrome). The landing page also carries JSON-LD
 (`WebSite`, `SoftwareSourceCode`).
+
+For language models the build writes `dist/llms.txt` and `dist/llms-full.txt`
+([llms.txt](https://llmstxt.org/)) with `scripts/llms.mjs`: the definition and
+the FAQ from `src/about.json`, the format specification from `@takesix/core`
+and the skill from `@takesix/mcp` (a dev dependency only for this). The FAQ
+page shows the same `src/about.json`. The definition is repeated word for word
+in the READMEs and `package.json` descriptions of the other repositories.
 
 After each deploy the workflow pings IndexNow with the URLs from the sitemap,
 so Bing, Yandex and others pick up changes right away. The key is served from

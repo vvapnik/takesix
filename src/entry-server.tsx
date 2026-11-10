@@ -5,6 +5,7 @@ import { ArchitecturePage } from './pages/ArchitecturePage'
 import { TodoPage } from './pages/TodoPage'
 import { GuidePage } from './pages/GuidePage'
 import { FormatPage } from './pages/FormatPage'
+import { FaqPage } from './pages/FaqPage'
 
 // Used at build time only (scripts/prerender.mjs): every page as HTML, so
 // search engines and AI crawlers that do not run JavaScript see the text.
@@ -15,6 +16,7 @@ const PAGES: Record<string, () => ReactNode> = {
   'examples/todo/index.html': () => <TodoPage />,
   'agents/index.html': () => <GuidePage />,
   'format/index.html': () => <FormatPage />,
+  'faq/index.html': () => <FaqPage />,
 }
 
 export const pages = Object.keys(PAGES)

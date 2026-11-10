@@ -20,6 +20,7 @@ const EXAMPLES: MenuItem[] = [
 
 const SOURCES: MenuItem[] = [
   { href: '/format/', title: 'Format', note: 'The JSON format in plain words' },
+  { href: '/faq/', title: 'FAQ', note: 'TakeSix next to Mermaid, C4, draw.io' },
   { href: `${GITHUB}/takesix-agent`, title: 'Agents', note: 'Agent Skill and MCP server' },
   { href: `${GITHUB}/takesix-react`, title: 'React', note: 'Viewer and editor component' },
   { href: `${GITHUB}/takesix`, title: 'This site', note: 'Landing page, examples, editor' },

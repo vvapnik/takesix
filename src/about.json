@@ -1,0 +1,38 @@
+{
+  "//": "One definition of TakeSix and the FAQ. Used by the FAQ page, llms.txt and llms-full.txt (scripts/llms.mjs). The READMEs and package.json descriptions of the other repositories repeat the definition word for word: change it there too.",
+  "definition": "TakeSix is an open format and libraries that let an AI agent answer with a diagram you can click into instead of a wall of text: at most six blocks per screen, and any block opens into up to six more.",
+  "faq": [
+    {
+      "q": "What is TakeSix?",
+      "a": "TakeSix is an open format and libraries that let an AI agent answer with a diagram you can click into instead of a wall of text: at most six blocks per screen, and any block opens into up to six more. The gist of the answer fits on the first screen; the reader clicks a block for depth, and long text opens next to the block that needs it."
+    },
+    {
+      "q": "How do I get TakeSix diagrams from my AI agent?",
+      "a": "Connect the MCP server @takesix/mcp (for example, in Claude Code: claude mcp add --scope user takesix -- npx -y @takesix/mcp), or install the Agent Skill from the takesix-agent repository. Then ask for an overview, a plan or an architecture \"as a TakeSix diagram\". It works with Claude Code, Claude Desktop, Codex, Cursor, VS Code and other MCP clients."
+    },
+    {
+      "q": "How is TakeSix different from Mermaid?",
+      "a": "Mermaid turns a text description into one flat picture, and a big subject makes a big, crowded picture. A TakeSix diagram is a tree of screens: each screen has at most six blocks, and any block opens into its own screen. The format is JSON made for agents to write: a validator lists every problem with its place in the file, so the agent fixes its own answer."
+    },
+    {
+      "q": "How is TakeSix different from the C4 model?",
+      "a": "C4 is a way to describe software architecture at four fixed levels: context, containers, components and code. TakeSix is a general format: any subject, as many levels as it needs, and a hard limit of six blocks per screen. A C4 model fits into TakeSix well; the architecture blueprint of the agent skill follows the same idea of zooming in."
+    },
+    {
+      "q": "How is TakeSix different from draw.io or Excalidraw?",
+      "a": "draw.io and Excalidraw are drawing tools: a person places shapes on a canvas by hand. In TakeSix an agent writes the diagram as JSON and places blocks on a 6×6 grid, so there are no coordinates to tune and every diagram reads the same way. A person can still open and change it in the TakeSix editor."
+    },
+    {
+      "q": "Why six blocks?",
+      "a": "A reader takes in a handful of things at a glance. Six blocks are enough to say the whole thing on one screen and few enough to read without scrolling. When a subject needs more, it gets another level, not a bigger screen."
+    },
+    {
+      "q": "What does an agent produce?",
+      "a": "A .takesix.json file and one self-contained HTML file that opens in any browser, without internet. In apps that support MCP Apps, such as Claude Desktop, the diagram also opens right in the chat."
+    },
+    {
+      "q": "Is it free, and where does my data go?",
+      "a": "TakeSix is open source under the MIT license. The MCP server and the skill run on your computer; the diagrams are not sent anywhere. The editor on takesix.vapnik.de also works in the browser only."
+    }
+  ]
+}
