@@ -7,7 +7,7 @@ import { CodeBlock } from '../shared/CodeBlock'
 
 const CORE = 'https://github.com/vvapnik/takesix-core'
 const SPEC = `${CORE}/blob/main/FORMAT.md`
-const SCHEMA_URL = 'https://raw.githubusercontent.com/vvapnik/takesix-core/main/schema/takesix-1.0.schema.json'
+const SCHEMA_URL = 'https://takesix.vapnik.de/schema/takesix-1.0.schema.json'
 
 const EXAMPLE = `{
   "$schema": "${SCHEMA_URL}",

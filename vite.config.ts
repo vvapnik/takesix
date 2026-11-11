@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { resolve } from 'node:path'
 import { PRELOADER_HTML } from '@takesix/react/preloader'
 import react from '@vitejs/plugin-react'
@@ -19,6 +21,18 @@ const FAQ_JSONLD = `<script type="application/ld+json">${JSON.stringify({
     acceptedAnswer: { '@type': 'Answer', text: a },
   })),
 })}</script>`
+
+// The JSON Schema lives at a permanent address on this site: its `$id` is this
+// URL, and `.takesix.json` files point their `$schema` here. The file comes from
+// @takesix/core; `$id` is set to the served URL so the two never disagree.
+const SCHEMA_PATH = 'schema/takesix-1.0.schema.json'
+const SCHEMA_ID = `https://takesix.vapnik.de/${SCHEMA_PATH}`
+const schemaJson = () => {
+  const file = createRequire(import.meta.url).resolve('@takesix/core/schema.json')
+  const schema = JSON.parse(readFileSync(file, 'utf8'))
+  return `${JSON.stringify({ ...schema, $id: SCHEMA_ID }, null, 2)}\n`
+}
+
 export default defineConfig({
   base: './',
   plugins: [
@@ -34,6 +48,18 @@ export default defineConfig({
     {
       name: 'takesix-faq-jsonld',
       transformIndexHtml: html => html.replace('<!-- faq-jsonld -->', FAQ_JSONLD),
+    },
+    {
+      name: 'takesix-schema',
+      configureServer: server => {
+        server.middlewares.use(`/${SCHEMA_PATH}`, (_req, res) => {
+          res.setHeader('Content-Type', 'application/schema+json')
+          res.end(schemaJson())
+        })
+      },
+      generateBundle() {
+        this.emitFile({ type: 'asset', fileName: SCHEMA_PATH, source: schemaJson() })
+      },
     },
   ],
   build: {

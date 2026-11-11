@@ -41,7 +41,7 @@ claude mcp add --scope user takesix -- npx -y @takesix/mcp
 - [The format in plain words](${SITE}/format/): blocks, the 6×6 grid, links, checks
 - [FAQ](${SITE}/faq/): what TakeSix is and how it differs from Mermaid, C4 and draw.io
 - [Format specification](${GITHUB}/takesix-core/blob/main/FORMAT.md): the exact rules of the JSON format
-- [JSON Schema](https://raw.githubusercontent.com/vvapnik/takesix-core/main/schema/takesix-1.0.schema.json)
+- [JSON Schema](https://takesix.vapnik.de/schema/takesix-1.0.schema.json)
 
 ## Packages
 
