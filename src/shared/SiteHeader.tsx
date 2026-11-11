@@ -15,6 +15,8 @@ interface MenuItem {
 const EXAMPLES: MenuItem[] = [
   { href: '/examples/architecture/', title: 'Architecture', note: 'A SaaS web app, part by part' },
   { href: '/examples/todo/', title: 'To-do list', note: 'Launch a website, with statuses' },
+  { href: '/examples/data-model/', title: 'Data model', note: 'A shop database, table by table' },
+  { href: '/examples/presentation/', title: 'Presentation', note: 'A team talk, part by part' },
   { href: '/#demo', title: 'TakeSix itself', note: 'The diagram on the home page' },
 ]
 

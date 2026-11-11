@@ -19,6 +19,8 @@ interface ExamplePageProps {
 const OTHERS: { name: ExampleName; href: string; title: string; note: string }[] = [
   { name: 'architecture', href: '/examples/architecture/', title: 'Architecture', note: 'A SaaS web app, part by part' },
   { name: 'todo', href: '/examples/todo/', title: 'To-do list', note: 'Launch a website, with statuses' },
+  { name: 'data-model', href: '/examples/data-model/', title: 'Data model', note: 'A shop database, table by table' },
+  { name: 'presentation', href: '/examples/presentation/', title: 'Presentation', note: 'A team talk, part by part' },
   { name: 'takesix', href: '/#demo', title: 'TakeSix itself', note: 'The diagram on the home page' },
 ]
 

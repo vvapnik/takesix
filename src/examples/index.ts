@@ -2,6 +2,8 @@ import { parseDocument, type TakeSixDocument } from '@takesix/core'
 import takesixSource from '../takesix.takesix.json?raw'
 import architectureSource from './architecture.takesix.json?raw'
 import todoSource from './todo.takesix.json?raw'
+import dataModelSource from './data-model.takesix.json?raw'
+import presentationSource from './presentation.takesix.json?raw'
 
 // The diagrams the site shows. The editor opens one of them by name:
 // /editor/?example=architecture
@@ -16,6 +18,8 @@ export const EXAMPLES = {
   takesix: parse('takesix', takesixSource),
   architecture: parse('architecture', architectureSource),
   todo: parse('todo', todoSource),
+  'data-model': parse('data-model', dataModelSource),
+  presentation: parse('presentation', presentationSource),
 }
 
 export type ExampleName = keyof typeof EXAMPLES

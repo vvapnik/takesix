@@ -2,7 +2,8 @@
 import { readFileSync } from 'node:fs'
 import { formatIssues, lintLayout, parseDocument } from '@takesix/core'
 
-const files = ['src/takesix.takesix.json', 'src/examples/architecture.takesix.json', 'src/examples/todo.takesix.json']
+const files = ['src/takesix.takesix.json', 'src/examples/architecture.takesix.json', 'src/examples/todo.takesix.json',
+  'src/examples/data-model.takesix.json', 'src/examples/presentation.takesix.json']
 let failed = false
 for (const file of files) {
   const result = parseDocument(readFileSync(file, 'utf8'))

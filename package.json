@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "validate": "node scripts/validate.mjs",
-    "og": "sh scripts/og-image.sh"
+    "og": "sh scripts/og-image.sh",
+    "demo-gif": "node scripts/demo-gif.mjs"
   },
   "engines": {
     "node": ">=22"

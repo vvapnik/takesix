@@ -3,7 +3,7 @@
 > TakeSix is an open format and libraries that let an AI agent answer with a diagram you can click into instead of a wall of text: at most six blocks per screen, and any block opens into up to six more.
 > **[takesix.vapnik.de](https://takesix.vapnik.de/)** · [FAQ](https://takesix.vapnik.de/faq/)
 
-![TakeSix: answers as diagrams, not walls of text. Six blocks of a checkout diagram with arrows.](https://takesix.vapnik.de/og.png)
+[![A TakeSix diagram of a web app architecture: a click zooms into a block, into one of its parts, into its text, and back to the top.](https://takesix.vapnik.de/demo.gif)](https://takesix.vapnik.de/examples/architecture/)
 
 The landing page and live demo of [TakeSix](https://takesix.vapnik.de/):
 answers as diagrams, not walls of text.
@@ -12,7 +12,8 @@ answers as diagrams, not walls of text.
   with install commands and a looping mini demo on top, a live TakeSix diagram
   about TakeSix below, rendered with
   [`@takesix/react`](https://github.com/vvapnik/takesix-react).
-- **Examples** (`examples/architecture/`, `examples/todo/`): a live diagram
+- **Examples** (`examples/architecture/`, `data-model/`, `presentation/`,
+  `todo/`): a live diagram
   with a text version, a link to open it in the editor and the prompt to get
   one like it from an agent. The diagrams are in `src/examples/`.
 - **Guide** (`agents/`): how to connect TakeSix to Claude Code, Claude
@@ -62,6 +63,11 @@ Link previews: Open Graph and Twitter tags in both pages point to
 `public/og.png` (1200×630). Its source is `og/og.html`; regenerate the image
 with `npm run og` (headless Chrome). The landing page also carries JSON-LD
 (`WebSite`, `SoftwareSourceCode`).
+
+The READMEs of all repositories show `public/demo.gif`: the architecture
+example zooming in level by level and back. `npm run demo-gif` records it again
+(headless Chrome over the DevTools protocol, then ffmpeg); run it after a
+change to the viewer's look, then deploy the site before the READMEs change.
 
 For language models the build writes `dist/llms.txt` and `dist/llms-full.txt`
 ([llms.txt](https://llmstxt.org/)) with `scripts/llms.mjs`: the definition and

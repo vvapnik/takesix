@@ -1,0 +1,105 @@
+{
+  "takesix": "1.0",
+  "title": "Shop data model",
+  "description": "Orders in the middle, the tables they touch above and below; open a table for its columns",
+  "blocks": [
+    {
+      "id": "customer",
+      "at": "A1:C1",
+      "icon": "👤",
+      "title": "Customer",
+      "description": "Accounts and their addresses",
+      "details": "## Columns\n\n- `id` uuid, primary key\n- `email` text, unique\n- `name` text\n- `created_at` timestamp\n\n## Relations\n\nOne customer places many orders. Addresses live in a separate table, so an old order keeps the address it was shipped to."
+    },
+    {
+      "id": "product",
+      "at": "D1:F1",
+      "icon": "📦",
+      "title": "Product",
+      "description": "Name, price and stock",
+      "details": "## Columns\n\n- `id` uuid, primary key\n- `sku` text, unique\n- `name` text\n- `price` integer, in cents\n- `stock` integer\n\n## Relations\n\nOrder lines point to a product, but copy its price: changing a price never changes an old order."
+    },
+    {
+      "id": "order",
+      "at": "B3:E3",
+      "icon": "🧾",
+      "title": "Order",
+      "description": "Who bought what, paid how, shipped where",
+      "children": [
+        {
+          "id": "order-head",
+          "at": "B1:C2",
+          "icon": "🧾",
+          "title": "Order",
+          "description": "One purchase: customer, status and total",
+          "details": "## Columns\n\n- `id` uuid, primary key\n- `customer_id` → Customer\n- `status` new · paid · shipped · cancelled\n- `total` integer, in cents\n- `placed_at` timestamp"
+        },
+        {
+          "id": "order-line",
+          "at": "B4:C5",
+          "icon": "📄",
+          "title": "Order line",
+          "description": "One product in an order, with quantity and price",
+          "details": "## Columns\n\n- `order_id` → Order\n- `product_id` → Product\n- `quantity` integer\n- `unit_price` integer, copied from the product"
+        },
+        {
+          "id": "discount",
+          "at": "E4:F5",
+          "icon": "🏷️",
+          "title": "Discount",
+          "description": "A code that lowers the price of some lines",
+          "details": "## Columns\n\n- `code` text, primary key\n- `percent` integer\n- `valid_until` date"
+        }
+      ]
+    },
+    {
+      "id": "payment",
+      "at": "A5:C5",
+      "icon": "💳",
+      "title": "Payment",
+      "description": "Charges and refunds per order",
+      "details": "## Columns\n\n- `id` uuid, primary key\n- `order_id` → Order\n- `amount` integer, in cents; negative for a refund\n- `provider_ref` text\n- `status` pending · succeeded · failed"
+    },
+    {
+      "id": "shipment",
+      "at": "D5:F5",
+      "icon": "🚚",
+      "title": "Shipment",
+      "description": "Parcels, carrier and tracking",
+      "details": "## Columns\n\n- `id` uuid, primary key\n- `order_id` → Order\n- `carrier` text\n- `tracking` text\n- `shipped_at` timestamp\n\nA large order can leave in several parcels."
+    }
+  ],
+  "links": [
+    {
+      "from": "customer",
+      "to": "order",
+      "label": "places"
+    },
+    {
+      "from": "order",
+      "to": "product",
+      "label": "lists"
+    },
+    {
+      "from": "payment",
+      "to": "order",
+      "label": "pays"
+    },
+    {
+      "from": "order",
+      "to": "shipment",
+      "label": "ships as"
+    },
+    {
+      "from": "order-head",
+      "to": "order-line",
+      "label": "1 → many"
+    },
+    {
+      "from": "order-line",
+      "to": "discount",
+      "label": "may apply",
+      "style": "dashed"
+    }
+  ]
+}

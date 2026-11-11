@@ -69,6 +69,8 @@ export default defineConfig({
         editor: resolve(import.meta.dirname, 'editor/index.html'),
         architecture: resolve(import.meta.dirname, 'examples/architecture/index.html'),
         todo: resolve(import.meta.dirname, 'examples/todo/index.html'),
+        'data-model': resolve(import.meta.dirname, 'examples/data-model/index.html'),
+        presentation: resolve(import.meta.dirname, 'examples/presentation/index.html'),
         agents: resolve(import.meta.dirname, 'agents/index.html'),
         format: resolve(import.meta.dirname, 'format/index.html'),
         faq: resolve(import.meta.dirname, 'faq/index.html'),

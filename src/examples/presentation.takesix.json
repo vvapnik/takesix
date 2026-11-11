@@ -1,0 +1,127 @@
+{
+  "takesix": "1.0",
+  "title": "From cron jobs to a job queue",
+  "description": "A 15-minute team talk in four parts; open a part for its slides and speaker notes",
+  "blocks": [
+    {
+      "id": "problem",
+      "at": "A1:C1",
+      "icon": "1",
+      "title": "The problem",
+      "description": "Cron jobs fail without a sound",
+      "children": [
+        {
+          "id": "p-crontab",
+          "at": "A2:B3",
+          "title": "40 jobs, one crontab",
+          "description": "Exports, emails and cleanups on a single server",
+          "details": "Everything that runs on a schedule lives in one crontab on one machine. Nobody owns it as a whole; each team added its lines over five years."
+        },
+        {
+          "id": "p-silent",
+          "at": "C2:D3",
+          "title": "Failures nobody saw",
+          "description": "A broken export was found by a customer, nine days late",
+          "details": "A cron job that fails writes to a log nobody reads. The nightly export to our biggest customer failed for nine days before they asked where their files were."
+        },
+        {
+          "id": "p-overlap",
+          "at": "E2:F3",
+          "title": "Overlapping runs",
+          "description": "A slow run overlapped the next one and locked tables",
+          "details": "When the invoice job took longer than an hour, the next run started anyway. Two runs locked the same rows and checkout stalled at 2 a.m."
+        }
+      ]
+    },
+    {
+      "id": "options",
+      "at": "B2:D2",
+      "icon": "2",
+      "title": "Three options",
+      "description": "Each one tried for a weekend",
+      "children": [
+        {
+          "id": "o-hosted",
+          "at": "A2:B3",
+          "title": "A hosted queue",
+          "description": "Reliable and managed, but one more service and one more bill",
+          "details": "Works well, but every job now needs network access and credentials for a new service, and local development needs an emulator."
+        },
+        {
+          "id": "o-redis",
+          "at": "C2:D3",
+          "title": "Redis and a worker",
+          "description": "Fast and popular, but Redis would hold state we must not lose",
+          "details": "Our Redis is a cache: we restart it freely and do not back it up. Keeping jobs there would turn a cache into a database."
+        },
+        {
+          "id": "o-postgres",
+          "at": "E2:F3",
+          "title": "A queue in Postgres",
+          "description": "Jobs as rows in the database we already run and back up",
+          "details": "Workers take the next job with `SELECT … FOR UPDATE SKIP LOCKED`. No new service; a job and the data it changes commit in one transaction."
+        }
+      ]
+    },
+    {
+      "id": "choice",
+      "at": "C3:E3",
+      "icon": "3",
+      "title": "The choice",
+      "description": "A queue in our own database",
+      "children": [
+        {
+          "id": "c-how",
+          "at": "A2:B3",
+          "title": "How it works",
+          "description": "A jobs table, a scheduler that adds rows, workers that take them",
+          "details": "```sql\nSELECT * FROM jobs\nWHERE run_at <= now() AND state = 'ready'\nORDER BY run_at\nLIMIT 1\nFOR UPDATE SKIP LOCKED;\n```\n\nThe scheduler only inserts rows; any number of workers can take them."
+        },
+        {
+          "id": "c-retry",
+          "at": "C2:D3",
+          "title": "Retries and dead jobs",
+          "description": "Three tries with back-off, then an alert with the error",
+          "details": "A failed job is retried after 1, 5 and 30 minutes. After the third failure it is marked dead, and the on-call channel gets the job name and the error."
+        },
+        {
+          "id": "c-move",
+          "at": "E2:F3",
+          "title": "Moving job by job",
+          "description": "One job a day, the noisiest first; cron kept as a fallback",
+          "details": "Each job moved on its own day, with its cron line commented out, not deleted, for two weeks. Nothing had to be rolled back."
+        }
+      ]
+    },
+    {
+      "id": "later",
+      "at": "D4:F4",
+      "icon": "4",
+      "title": "Six months later",
+      "description": "Failures seen in minutes",
+      "children": [
+        {
+          "id": "l-minutes",
+          "at": "A2:B3",
+          "title": "Failures in minutes",
+          "description": "Every failed job reaches the on-call channel",
+          "details": "The median time from a failure to someone looking at it went from days (when a customer noticed) to under ten minutes."
+        },
+        {
+          "id": "l-nights",
+          "at": "C2:D3",
+          "title": "Quieter nights",
+          "description": "No more overlapping runs: one worker per job at a time",
+          "details": "Overlaps are impossible by design: a running job holds its row. Night pages about locked tables stopped."
+        },
+        {
+          "id": "l-again",
+          "at": "E2:F3",
+          "title": "What we would do again",
+          "description": "Start with the noisiest job, keep the old path for a while",
+          "details": "Moving one job a day kept every change small enough to explain in a sentence. The table of jobs became the documentation nobody wrote before."
+        }
+      ]
+    }
+  ]
+}

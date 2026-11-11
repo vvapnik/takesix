@@ -53,6 +53,8 @@ claude mcp add --scope user takesix -- npx -y @takesix/mcp
 
 - [Architecture of a SaaS web app](${SITE}/examples/architecture/)
 - [To-do list with statuses](${SITE}/examples/todo/)
+- [Data model of a shop](${SITE}/examples/data-model/)
+- [Presentation: a team talk](${SITE}/examples/presentation/)
 
 ## Optional
 

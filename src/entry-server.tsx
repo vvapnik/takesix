@@ -3,6 +3,8 @@ import { renderToString } from 'react-dom/server'
 import { App } from './App'
 import { ArchitecturePage } from './pages/ArchitecturePage'
 import { TodoPage } from './pages/TodoPage'
+import { DataModelPage } from './pages/DataModelPage'
+import { PresentationPage } from './pages/PresentationPage'
 import { GuidePage } from './pages/GuidePage'
 import { FormatPage } from './pages/FormatPage'
 import { FaqPage } from './pages/FaqPage'
@@ -14,6 +16,8 @@ const PAGES: Record<string, () => ReactNode> = {
   'index.html': () => <App />,
   'examples/architecture/index.html': () => <ArchitecturePage />,
   'examples/todo/index.html': () => <TodoPage />,
+  'examples/data-model/index.html': () => <DataModelPage />,
+  'examples/presentation/index.html': () => <PresentationPage />,
   'agents/index.html': () => <GuidePage />,
   'format/index.html': () => <FormatPage />,
   'faq/index.html': () => <FaqPage />,
