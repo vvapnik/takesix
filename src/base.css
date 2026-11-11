@@ -1,6 +1,10 @@
 /* Shared by the landing page and the editor. Tokens follow the viewer's own
    (--ts-*), so the page chrome and the diagrams read as one in both themes. */
 :root {
+  /* The TakeSix zoom: ZOOM_MS and ZOOM_EASE of @takesix/react, so the
+     site's demos zoom like the viewer */
+  --zoom-ms: 480ms;
+  --zoom-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --bg: #f0f2f5;
   --surface: #ffffff;
   --sunken: #e6eaf0;

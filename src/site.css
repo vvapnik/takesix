@@ -437,12 +437,12 @@ body {
   border-radius: 10px;
   overflow: hidden;
   transition:
-    top 0.55s cubic-bezier(0.2, 0.7, 0.2, 1),
-    left 0.55s cubic-bezier(0.2, 0.7, 0.2, 1),
-    width 0.55s cubic-bezier(0.2, 0.7, 0.2, 1),
-    height 0.55s cubic-bezier(0.2, 0.7, 0.2, 1),
-    border-radius 0.55s,
-    background 0.55s;
+    top var(--zoom-ms) var(--zoom-ease),
+    left var(--zoom-ms) var(--zoom-ease),
+    width var(--zoom-ms) var(--zoom-ease),
+    height var(--zoom-ms) var(--zoom-ease),
+    border-radius var(--zoom-ms) var(--zoom-ease),
+    background var(--zoom-ms) var(--zoom-ease);
 }
 
 .zoom.open {

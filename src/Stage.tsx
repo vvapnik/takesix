@@ -75,7 +75,8 @@ const PRESS = 160
 const READ_INSIDE = 1600
 const MOVE_TO_CRUMB = 1100
 /** Durations of the CSS transitions the loop waits for. */
-const GROW = 550
+/** The zoom: --zoom-ms in base.css (ZOOM_MS of @takesix/react). */
+const GROW = 480
 const FADE = 250
 
 type CursorKind = 'arrow' | 'zoom' | 'hand'
@@ -396,8 +397,9 @@ function Arrows({ links }: { links: [string, string][] }) {
   return (
     <svg className="arrows" aria-hidden="true" ref={svgRef}>
       <defs>
-        <marker id="stage-head" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
-          <path d="M0,0 L8,4 L0,8 Z" fill="var(--accent)" />
+        {/* The TakeSix arrowhead of @takesix/react (a dart with swept barbs), smaller; tip at the path's end */}
+        <marker id="stage-head" viewBox="-5 -1 19 13" refX="13" refY="5.5" markerWidth="9.5" markerHeight="6.5" orient="auto">
+          <path d="M-4,0 L13,5.5 L-4,11 L0.5,5.5 Z" fill="var(--accent)" stroke="var(--accent)" strokeLinejoin="round" />
         </marker>
       </defs>
       {paths.map((d, i) => (
