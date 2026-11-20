@@ -4,18 +4,11 @@ body {
   overflow: hidden;
 }
 
-/* Two screens; scrolling always settles on one of them. */
+/* Three screens that scroll freely; the buttons between them glide. */
 .snap {
   height: 100dvh;
   overflow-y: auto;
-  scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
-}
-
-.hero,
-.demo {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
 }
 
 /* ---------- Screen 1 ---------- */
@@ -43,52 +36,14 @@ body {
   max-width: 36rem;
 }
 
-/* The title with the badge in the free space to its right, towards the demo.
-   The title keeps three lines at any size; the badge hangs past its edge. */
+/* The title keeps three lines at any size */
 .headline {
-  position: relative;
-  width: fit-content;
-  max-width: 100%;
   margin: 0 0 24px;
 }
 
 .headline h1 {
   width: 6.3em;
   max-width: 100%;
-}
-
-/* Before 1.0: the format and the libraries may still change */
-.badge {
-  position: absolute;
-  top: 0;
-  left: calc(100% + 24px);
-  margin: 0.9em 0 0;
-  padding: 4px 12px;
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-family: var(--mono);
-  font-size: 0.78rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-/* No room beside the title: the badge goes above it */
-@media (max-width: 1260px) {
-  .headline {
-    display: flex;
-    flex-direction: column-reverse;
-    align-items: flex-start;
-    gap: 20px;
-  }
-
-  .badge {
-    position: static;
-    margin: 0;
-  }
 }
 
 .pitch h1 {
@@ -729,6 +684,86 @@ body {
   min-height: 0;
 }
 
+/* ---------- Screen 2: how it works (the demo GIF) ---------- */
+
+/* Built like the first screen: the picture on the left, the words on the right */
+.tour {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 0 clamp(16px, 5vw, 72px);
+  /* A screen of its own colour between the first screen and the live
+     diagram, so the edges between the three stand out */
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  box-shadow: inset 0 12px 24px -16px rgb(0 0 0 / 0.18);
+}
+
+.tour-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(32px, 5vw, 80px);
+  padding: 48px 0 24px;
+  max-width: 1320px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.tour-gif {
+  display: block;
+  justify-self: end;
+  max-width: 100%;
+}
+
+/* As large as the screen allows, never past its own size */
+.tour-gif img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 880px;
+  max-height: calc(100dvh - 200px);
+  object-fit: contain;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.12);
+}
+
+.tour-text {
+  max-width: 32rem;
+}
+
+.tour-text h2 {
+  margin: 0 0 24px;
+  font-size: clamp(2rem, min(3.6vw, 6vh), 3rem);
+  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.principles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+  font-size: 1.02rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+/* Scrolling is free here: the button sits under the text, not pinned over it */
+.tour .cue {
+  position: static;
+}
+
+.principles strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
 /* ---------- Short windows ---------- */
 
 @media (max-height: 820px) {
@@ -764,6 +799,20 @@ body {
 
   .stage {
     display: none;
+  }
+
+  /* The picture above the words */
+  .tour-body {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+  }
+
+  .tour-gif {
+    justify-self: center;
+  }
+
+  .tour-gif img {
+    max-height: 50dvh;
   }
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { TakeSix } from '@takesix/react'
 import { Stage } from './Stage'
 import { DiagramOutline } from './DiagramOutline'
@@ -14,52 +14,25 @@ const COMMANDS = [
   { label: 'Codex', text: 'codex mcp add takesix -- npx -y @takesix/mcp' },
 ]
 
+const PRINCIPLES = [
+  { title: 'The gist on one screen.', text: 'At most six blocks, placed on a 6×6 grid: the whole answer reads at a glance.' },
+  { title: 'Click for depth.', text: 'Any block opens into its own screen of up to six more, as many levels as the subject needs.' },
+  { title: 'Long text where it belongs.', text: 'A block can open into text instead, next to the part it explains.' },
+  { title: 'Written by the agent.', text: 'One JSON file; the validator points at every problem, so the agent fixes its own answer.' },
+  { title: 'Opens anywhere.', text: 'One HTML file that works offline, the editor in the browser, or right in the chat.' },
+]
+
 function scrollBehavior(): ScrollBehavior {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
-}
-
-/** True when `from` or a parent below `root` can still scroll in the wheel's direction. */
-function innerScrolls(from: EventTarget | null, root: HTMLElement, down: boolean): boolean {
-  for (let n = from instanceof Element ? from : null; n && n !== root; n = n.parentElement) {
-    if (n.scrollHeight <= n.clientHeight + 1 || !/(auto|scroll)/.test(getComputedStyle(n).overflowY)) continue
-    if (down ? n.scrollTop + n.clientHeight < n.scrollHeight - 1 : n.scrollTop > 0) return true
-  }
-  return false
 }
 
 export function App() {
   const snapRef = useRef<HTMLElement>(null)
   const heroRef = useRef<HTMLElement>(null)
   const demoRef = useRef<HTMLElement>(null)
+  const tourRef = useRef<HTMLElement>(null)
 
   const goTo = (target: HTMLElement | null) => target?.scrollIntoView({ behavior: scrollBehavior() })
-
-  // CSS snapping alone pulls a short wheel scroll back to where it started.
-  // One wheel gesture moves a whole screen instead; touch and keys keep the
-  // browser's own snapping.
-  useEffect(() => {
-    const root = snapRef.current
-    const hero = heroRef.current
-    const demo = demoRef.current
-    if (!root || !hero || !demo) return
-    let lockedUntil = 0
-
-    function onWheel(e: WheelEvent) {
-      if (e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return
-      const down = e.deltaY > 0
-      if (innerScrolls(e.target, root!, down)) return
-      // A hero taller than the window (short screens) scrolls normally to its end.
-      if (down && root!.scrollTop + root!.clientHeight < hero!.offsetHeight - 1) return
-      e.preventDefault()
-      const target = down ? demo! : hero!
-      if (Date.now() < lockedUntil || Math.abs(root!.scrollTop - target.offsetTop) < 2) return
-      lockedUntil = Date.now() + 700
-      goTo(target)
-    }
-
-    root.addEventListener('wheel', onWheel, { passive: false })
-    return () => root.removeEventListener('wheel', onWheel)
-  }, [])
 
   return (
     <main className="snap" ref={snapRef}>
@@ -70,7 +43,6 @@ export function App() {
           <div className="pitch">
             <div className="headline">
               <h1 id="hero-title">Answers as diagrams, not walls of text</h1>
-              <p className="badge">Early Access</p>
             </div>
             <p className="lead">
               TakeSix lets an AI agent answer with a diagram you can click into. The gist fits on one screen of six
@@ -92,6 +64,35 @@ export function App() {
             <p className="fine">Open source under MIT: format, libraries, skill and MCP server.</p>
           </div>
           <Stage />
+        </div>
+
+        <button type="button" className="cue" onClick={() => goTo(tourRef.current)}>
+          <ChevronDown />
+          <span>Next: how it works</span>
+        </button>
+      </section>
+
+      <section className="tour" id="how-it-works" ref={tourRef} aria-labelledby="tour-title">
+        <div className="tour-body">
+          <a className="tour-gif" href="/examples/architecture/">
+            <img
+              src="/demo.gif"
+              width={880}
+              height={560}
+              loading="lazy"
+              alt="A TakeSix diagram of a web app architecture: a click zooms into a block, into one of its parts, into its text, and back to the top."
+            />
+          </a>
+          <div className="tour-text">
+            <h2 id="tour-title">How it works</h2>
+            <ul className="principles">
+              {PRINCIPLES.map(p => (
+                <li key={p.title}>
+                  <strong>{p.title}</strong> {p.text}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
         <button type="button" className="cue" onClick={() => goTo(demoRef.current)}>
