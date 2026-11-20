@@ -152,3 +152,34 @@ body {
     display: none;
   }
 }
+
+/* Save menu: JSON, HTML, Link */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  min-width: 100%;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.12);
+}
+
+.toolbar .dropdown-menu button {
+  border: 0;
+  border-radius: 5px;
+  text-align: left;
+}
+
+.toolbar .dropdown-menu button:hover,
+.toolbar .dropdown-menu button:focus-visible {
+  background: var(--hover, var(--line));
+}

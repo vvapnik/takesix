@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createDocument, formatIssues, parseDocument, serializeDocument, type TakeSixDocument } from '@takesix/core'
-import { readDocumentFromHash, TakeSix, type Theme } from '@takesix/react'
+import { createEditorLink, readDocumentFromHash, TakeSix, type Theme } from '@takesix/react'
 import { EXAMPLES, isExampleName } from '../examples'
 // Inlined so the logo takes the text colour (it draws with currentColor)
 import logoSvg from '../logo.svg?raw'
@@ -33,6 +33,10 @@ export function Editor() {
   const [error, setError] = useState<string | null>(null)
   const [dirty, setDirty] = useState(false)
   const [dragging, setDragging] = useState(false)
+  // The Save menu: JSON, HTML or a link
+  const [saveOpen, setSaveOpen] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
+  const saveRef = useRef<HTMLDivElement>(null)
   // Remount the viewer on New/Open so navigation starts at the top level.
   const [version, setVersion] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -71,7 +75,8 @@ export function Editor() {
     setTimeout(() => URL.revokeObjectURL(url), 1000)
   }
 
-  function save() {
+  function saveJson() {
+    setSaveOpen(false)
     download(serializeDocument(doc), 'application/json', fileName(doc))
     setDirty(false)
   }
@@ -79,9 +84,42 @@ export function Editor() {
   // A page that opens as the diagram on its own. The viewer inside it (~300 KB
   // with React) is a separate chunk, loaded only when someone saves HTML.
   async function saveHtml() {
+    setSaveOpen(false)
     const { standaloneHtml } = await import('@takesix/react/standalone')
     download(standaloneHtml(doc), 'text/html', fileName(doc).replace(/\.takesix\.json$/, '.html'))
   }
+
+  // A link to this editor with the diagram inside (#takesix=...), copied to the clipboard
+  async function copyLink() {
+    setSaveOpen(false)
+    try {
+      const link = await createEditorLink(doc, window.location.origin + window.location.pathname)
+      if (!link) { setError('This diagram is too big to open by link: save it as JSON or HTML.'); return }
+      await navigator.clipboard.writeText(link)
+      setLinkCopied(true)
+    } catch (e) {
+      setError(`Could not copy the link: ${(e as Error).message}`)
+    }
+  }
+
+  useEffect(() => {
+    if (!linkCopied) return
+    const timer = setTimeout(() => setLinkCopied(false), 1500)
+    return () => clearTimeout(timer)
+  }, [linkCopied])
+
+  // The Save menu closes on Escape and on a click outside
+  useEffect(() => {
+    if (!saveOpen) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSaveOpen(false) }
+    const onPointer = (e: PointerEvent) => { if (!saveRef.current?.contains(e.target as Node)) setSaveOpen(false) }
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('pointerdown', onPointer)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('pointerdown', onPointer)
+    }
+  }, [saveOpen])
 
   function change(next: TakeSixDocument) {
     setDoc(next)
@@ -150,17 +188,24 @@ export function Editor() {
           <button type="button" onClick={() => load(createDocument({ title: 'Untitled' }))}>
             New
           </button>
+          <div ref={saveRef} className="dropdown">
+            <button type="button" aria-haspopup="menu" aria-expanded={saveOpen} onClick={() => setSaveOpen(o => !o)}>
+              {linkCopied ? 'Link copied' : `Save${dirty ? ' •' : ''}`}
+            </button>
+            {saveOpen && (
+              <div className="dropdown-menu" role="menu" aria-label="Save">
+                <button type="button" role="menuitem" onClick={saveJson}>JSON</button>
+                <button type="button" role="menuitem" onClick={saveHtml} title="One HTML file that opens as the diagram without a server">
+                  HTML
+                </button>
+                <button type="button" role="menuitem" onClick={copyLink} title="Copies a link to this editor with the diagram inside">
+                  Link
+                </button>
+              </div>
+            )}
+          </div>
           <button type="button" onClick={() => fileInputRef.current?.click()}>
             Open…
-          </button>
-          <button type="button" onClick={save}>
-            Save{dirty ? ' •' : ''}
-          </button>
-          <button type="button" onClick={saveHtml} title="One HTML file that opens as the diagram without a server">
-            Save as HTML
-          </button>
-          <button type="button" onClick={() => load(EXAMPLE)}>
-            Example
           </button>
         </div>
         <div className="toolbar-group end">
