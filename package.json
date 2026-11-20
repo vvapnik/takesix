@@ -17,13 +17,13 @@
     "node": ">=22"
   },
   "dependencies": {
-    "@takesix/core": "^0.8.0",
-    "@takesix/react": "^0.10.1",
+    "@takesix/core": "^1.0.1",
+    "@takesix/react": "^1.0.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "@takesix/mcp": "^0.9.1",
+    "@takesix/mcp": "^1.0.0",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
