@@ -1,10 +1,12 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
+import type { JourneyAddress } from '@takesix/core'
 import { TakeSix } from '@takesix/react'
 import { Stage } from './Stage'
 import { DiagramOutline } from './DiagramOutline'
 import { SiteHeader } from './shared/SiteHeader'
 import { ChevronDown } from './shared/icons'
 import { useCopy } from './shared/useCopy'
+import { JourneysMenu } from './shared/JourneysMenu'
 import { EXAMPLES } from './examples'
 
 const diagram = EXAMPLES.takesix
@@ -27,6 +29,7 @@ function scrollBehavior(): ScrollBehavior {
 }
 
 export function App() {
+  const [journey, setJourney] = useState<JourneyAddress | null>(null)
   const snapRef = useRef<HTMLElement>(null)
   const heroRef = useRef<HTMLElement>(null)
   const demoRef = useRef<HTMLElement>(null)
@@ -105,6 +108,7 @@ export function App() {
         <div className="demo-bar">
           <span>Live TakeSix diagram</span>
           <div className="demo-actions">
+            <JourneysMenu document={diagram} active={journey?.journey} onStart={id => setJourney({ journey: id, step: 0 })} />
             <a href="/editor/">Edit it in the editor</a>
             <button type="button" onClick={() => goTo(heroRef.current)}>
               Back to top
@@ -112,7 +116,7 @@ export function App() {
           </div>
         </div>
         <div className="demo-view">
-          <TakeSix document={diagram} />
+          <TakeSix document={diagram} journey={journey} onJourneyChange={setJourney} />
         </div>
         <DiagramOutline document={diagram} />
       </section>

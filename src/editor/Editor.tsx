@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { createDocument, formatIssues, parseDocument, serializeDocument, type TakeSixDocument } from '@takesix/core'
+import { addJourney, createDocument, formatIssues, parseDocument, serializeDocument, type JourneyAddress, type TakeSixDocument } from '@takesix/core'
 import { createEditorLink, readDocumentFromHash, TakeSix, type Theme } from '@takesix/react'
 import { EXAMPLES, isExampleName } from '../examples'
+import { JourneysMenu } from '../shared/JourneysMenu'
 // Inlined so the logo takes the text colour (it draws with currentColor)
 import logoSvg from '../logo.svg?raw'
 
@@ -40,11 +41,20 @@ export function Editor() {
   // Remount the viewer on New/Open so navigation starts at the top level.
   const [version, setVersion] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  // The journey on screen: started from the toolbar or the viewer's own controls
+  const [journey, setJourney] = useState<JourneyAddress | null>(null)
+
+  function newJourney() {
+    const { document: next, journey: created } = addJourney(doc, { title: `Journey ${(doc.journeys?.length ?? 0) + 1}` })
+    change(next)
+    setJourney({ journey: created.id, step: 0 })
+  }
 
   function load(next: TakeSixDocument) {
     if (dirty && !window.confirm('Discard the changes you have not saved?')) return
     setDoc(next)
     setVersion(v => v + 1)
+    setJourney(null)
     setDirty(false)
     setError(null)
   }
@@ -207,6 +217,12 @@ export function Editor() {
           <button type="button" onClick={() => fileInputRef.current?.click()}>
             Open…
           </button>
+          <JourneysMenu
+            document={doc}
+            active={journey?.journey}
+            onStart={id => setJourney({ journey: id, step: 0 })}
+            onCreate={newJourney}
+          />
         </div>
         <div className="toolbar-group end">
           <button
@@ -244,7 +260,15 @@ export function Editor() {
       )}
 
       <main className="canvas">
-        <TakeSix key={version} document={doc} onChange={change} editing={editing} theme={theme} />
+        <TakeSix
+          key={version}
+          document={doc}
+          onChange={change}
+          editing={editing}
+          theme={theme}
+          journey={journey}
+          onJourneyChange={setJourney}
+        />
       </main>
 
       <p className="drop-hint" aria-hidden="true">
