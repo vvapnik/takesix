@@ -7,11 +7,11 @@ import { CodeBlock } from '../shared/CodeBlock'
 
 const CORE = 'https://github.com/vvapnik/takesix-core'
 const SPEC = `${CORE}/blob/main/FORMAT.md`
-const SCHEMA_URL = 'https://takesix.vapnik.de/schema/takesix-1.0.schema.json'
+const SCHEMA_URL = 'https://takesix.vapnik.de/schema/takesix-1.1.schema.json'
 
 const EXAMPLE = `{
   "$schema": "${SCHEMA_URL}",
-  "takesix": "1.0",
+  "takesix": "1.1",
   "title": "Online shop",
   "blocks": [
     { "id": "web", "at": "A1:C1", "icon": "🖥", "title": "Web app", "description": "React SPA" },
@@ -40,6 +40,7 @@ const SECTIONS = [
   { id: 'grid', title: 'The grid' },
   { id: 'links', title: 'Links' },
   { id: 'flowcharts', title: 'Flowcharts' },
+  { id: 'tone', title: 'Tone' },
   { id: 'checks', title: 'Checking a diagram' },
   { id: 'extend', title: 'Extensions and versions' },
 ]
@@ -61,7 +62,7 @@ export function FormatPage() {
         </nav>
 
         <article className="doc">
-          <p className="kicker">Format 1.0</p>
+          <p className="kicker">Format 1.1</p>
           <h1>The TakeSix format</h1>
           <p className="lead">
             A TakeSix diagram is one JSON file: a tree of blocks, never more than six side by side, and the arrows
@@ -130,7 +131,7 @@ export function FormatPage() {
                     <code>takesix</code>
                   </td>
                   <td>
-                    The format version, <code>"1.0"</code>. Required.
+                    The format version, <code>"1.1"</code>. Required.
                   </td>
                 </tr>
                 <tr>
@@ -219,6 +220,15 @@ export function FormatPage() {
                   <td>
                     A flowchart symbol, such as <code>"decision"</code>; see <a href="#flowcharts">flowcharts</a>. A
                     plain card when left out.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>tone</code>
+                  </td>
+                  <td>
+                    The block’s colour by what it means, such as <code>"danger"</code>, or a colour of its own like{' '}
+                    <code>"#7a5af8"</code>; see <a href="#tone">tone</a>. A plain card when left out. Since 1.1.
                   </td>
                 </tr>
                 <tr>
@@ -368,6 +378,44 @@ export function FormatPage() {
             warn when a decision has no 2 or 3 labelled exits, or a screen has more than one start.
           </p>
 
+          <h2 id="tone">Tone</h2>
+          <p>
+            <code>tone</code> colours a block by what it means, so a reader sees at a glance which blocks stand out
+            and why:
+          </p>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>tone</th>
+                  <th>For</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ['neutral', 'most blocks (the default)'],
+                  ['accent', 'the main point, the block to look at first'],
+                  ['success', 'done, healthy, the happy path'],
+                  ['warning', 'at risk, needs attention'],
+                  ['danger', 'broken, an error, a dead end'],
+                ].map(([tone, use]) => (
+                  <tr key={tone}>
+                    <td>
+                      <code>{tone}</code>
+                    </td>
+                    <td>{use}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p>
+            A colour of your own, <code>"#RGB"</code> or <code>"#RRGGBB"</code>, marks categories the names do not
+            cover, such as teams. Viewers turn any tone into a light fill and a border in the colours of their theme,
+            light or dark, and the text keeps its own colours. Colour only repeats what the text says, so name the risk
+            or the error in the title too, and colour a few blocks: when every block is coloured, none stands out.
+          </p>
+
           <h2 id="checks">Checking a diagram</h2>
           <p>A diagram that breaks these rules is rejected, with the place of each problem in the JSON:</p>
           <ul>
@@ -384,12 +432,13 @@ export function FormatPage() {
             <li>two blocks or two links share an id;</li>
             <li>a link points at an id that is not a block, or from a block to itself;</li>
             <li>
-              <code>direction</code>, <code>style</code> or <code>shape</code> has an unknown value, or the version
-              is not <code>1.x</code>.
+              <code>direction</code>, <code>style</code>, <code>shape</code> or <code>tone</code> is not a string,
+              or the version is not <code>1.x</code>.
             </li>
           </ul>
           <p>
-            Unknown fields are only a warning: they are often typos. The JSON Schema is stricter and rejects them, which
+            Unknown fields and values are only a warning: they are often typos, or come from a later 1.x, and an
+            unknown value is drawn as the default. The JSON Schema is stricter and rejects them, which
             catches mistakes while an agent writes a diagram.
           </p>
           <p>Ways to check a file:</p>
@@ -415,8 +464,8 @@ export function FormatPage() {
             <code>meta</code> it does not understand, so data survives a trip through another editor.
           </p>
           <p>
-            The version is <code>"major.minor"</code>. A minor version only adds optional fields, so a 1.0 reader opens
-            any 1.x file. A new major version is a breaking change, and readers refuse majors they do not know.
+            The version is <code>"major.minor"</code>. A minor version only adds optional fields and values, so a 1.0
+            reader opens any 1.x file. 1.1 added <code>tone</code>. A new major version is a breaking change, and readers refuse majors they do not know.
           </p>
 
           <p className="doc-next">
