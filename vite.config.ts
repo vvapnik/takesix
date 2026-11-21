@@ -22,15 +22,19 @@ const FAQ_JSONLD = `<script type="application/ld+json">${JSON.stringify({
   })),
 })}</script>`
 
-// The JSON Schema lives at a permanent address on this site: its `$id` is this
-// URL, and `.takesix.json` files point their `$schema` here. The file comes from
-// @takesix/core; `$id` is set to the served URL so the two never disagree.
-const SCHEMA_PATH = 'schema/takesix-1.0.schema.json'
-const SCHEMA_ID = `https://takesix.vapnik.de/${SCHEMA_PATH}`
-const schemaJson = () => {
-  const file = createRequire(import.meta.url).resolve('@takesix/core/schema.json')
+// The JSON Schemas live at permanent addresses on this site: their `$id` is
+// the URL, and `.takesix.json` files point their `$schema` there. Every format
+// version keeps its schema (files written as 1.0 still point at 1.0). The
+// files come from @takesix/core; `$id` is set to the served URL so the two
+// never disagree.
+const SCHEMAS: Record<string, string> = {
+  'schema/takesix-1.1.schema.json': '@takesix/core/schema.json',
+  'schema/takesix-1.0.schema.json': '@takesix/core/schema-1.0.json',
+}
+const schemaJson = (path: string) => {
+  const file = createRequire(import.meta.url).resolve(SCHEMAS[path]!)
   const schema = JSON.parse(readFileSync(file, 'utf8'))
-  return `${JSON.stringify({ ...schema, $id: SCHEMA_ID }, null, 2)}\n`
+  return `${JSON.stringify({ ...schema, $id: `https://takesix.vapnik.de/${path}` }, null, 2)}\n`
 }
 
 export default defineConfig({
@@ -52,13 +56,15 @@ export default defineConfig({
     {
       name: 'takesix-schema',
       configureServer: server => {
-        server.middlewares.use(`/${SCHEMA_PATH}`, (_req, res) => {
-          res.setHeader('Content-Type', 'application/schema+json')
-          res.end(schemaJson())
-        })
+        for (const path of Object.keys(SCHEMAS)) {
+          server.middlewares.use(`/${path}`, (_req, res) => {
+            res.setHeader('Content-Type', 'application/schema+json')
+            res.end(schemaJson(path))
+          })
+        }
       },
       generateBundle() {
-        this.emitFile({ type: 'asset', fileName: SCHEMA_PATH, source: schemaJson() })
+        for (const path of Object.keys(SCHEMAS)) this.emitFile({ type: 'asset', fileName: path, source: schemaJson(path) })
       },
     },
   ],
