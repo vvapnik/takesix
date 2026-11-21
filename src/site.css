@@ -830,6 +830,21 @@ body {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  /* Room for Journeys, the editor link and Back to top */
+  .demo-bar {
+    padding: 0 16px;
+  }
+
+  .demo-bar > span {
+    display: none;
+  }
+
+  .demo-actions {
+    flex: 1;
+    justify-content: space-between;
+    gap: 8px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

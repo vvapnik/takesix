@@ -1,11 +1,12 @@
-import type { ReactNode } from 'react'
-import { serializeDocument, type TakeSixDocument } from '@takesix/core'
+import { useState, type ReactNode } from 'react'
+import { serializeDocument, type JourneyAddress, type TakeSixDocument } from '@takesix/core'
 import { TakeSix } from '@takesix/react'
 import { EXAMPLES, type ExampleName } from '../examples'
 import { DiagramOutline } from '../DiagramOutline'
 import { SiteHeader } from '../shared/SiteHeader'
 import { SiteFooter } from '../shared/SiteFooter'
 import { CodeBlock } from '../shared/CodeBlock'
+import { JourneysMenu } from '../shared/JourneysMenu'
 
 interface ExamplePageProps {
   name: ExampleName
@@ -37,6 +38,7 @@ function download(doc: TakeSixDocument, name: string) {
 /** One example diagram: what it shows, the live diagram, its text version and how to get one from an agent. */
 export function ExamplePage({ name, heading, intro, prompt }: ExamplePageProps) {
   const doc = EXAMPLES[name]
+  const [journey, setJourney] = useState<JourneyAddress | null>(null)
   return (
     <div className="page">
       <SiteHeader />
@@ -52,11 +54,17 @@ export function ExamplePage({ name, heading, intro, prompt }: ExamplePageProps) 
             <button type="button" className="secondary" onClick={() => download(doc, name)}>
               Download .takesix.json
             </button>
+            <JourneysMenu
+              className="secondary"
+              document={doc}
+              active={journey?.journey}
+              onStart={id => setJourney({ journey: id, step: 0 })}
+            />
           </div>
         </section>
 
         <section className="example-view" aria-label={`${doc.title}, live diagram`}>
-          <TakeSix document={doc} />
+          <TakeSix document={doc} journey={journey} onJourneyChange={setJourney} />
         </section>
 
         <section className="example-text">

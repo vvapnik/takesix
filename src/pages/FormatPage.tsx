@@ -7,11 +7,11 @@ import { CodeBlock } from '../shared/CodeBlock'
 
 const CORE = 'https://github.com/vvapnik/takesix-core'
 const SPEC = `${CORE}/blob/main/FORMAT.md`
-const SCHEMA_URL = 'https://takesix.vapnik.de/schema/takesix-1.1.schema.json'
+const SCHEMA_URL = 'https://takesix.vapnik.de/schema/takesix-1.2.schema.json'
 
 const EXAMPLE = `{
   "$schema": "${SCHEMA_URL}",
-  "takesix": "1.1",
+  "takesix": "1.2",
   "title": "Online shop",
   "blocks": [
     { "id": "web", "at": "A1:C1", "icon": "🖥", "title": "Web app", "description": "React SPA" },
@@ -33,6 +33,19 @@ const EXAMPLE = `{
   ]
 }`
 
+const JOURNEY_EXAMPLE = `"journeys": [
+  {
+    "id": "checkout",
+    "title": "How an order is placed",
+    "steps": [
+      { "label": "The whole shop" },
+      { "at": "web", "label": "The customer starts in the web app" },
+      { "in": "api", "label": "The API", "duration": 8 },
+      { "in": "orders", "notes": "Mention **refunds** here." }
+    ]
+  }
+]`
+
 const SECTIONS = [
   { id: 'idea', title: 'The idea' },
   { id: 'example', title: 'A first diagram' },
@@ -41,6 +54,7 @@ const SECTIONS = [
   { id: 'links', title: 'Links' },
   { id: 'flowcharts', title: 'Flowcharts' },
   { id: 'tone', title: 'Tone' },
+  { id: 'journeys', title: 'Journeys' },
   { id: 'checks', title: 'Checking a diagram' },
   { id: 'extend', title: 'Extensions and versions' },
 ]
@@ -62,7 +76,7 @@ export function FormatPage() {
         </nav>
 
         <article className="doc">
-          <p className="kicker">Format 1.1</p>
+          <p className="kicker">Format 1.2</p>
           <h1>The TakeSix format</h1>
           <p className="lead">
             A TakeSix diagram is one JSON file: a tree of blocks, never more than six side by side, and the arrows
@@ -131,7 +145,7 @@ export function FormatPage() {
                     <code>takesix</code>
                   </td>
                   <td>
-                    The format version, <code>"1.1"</code>. Required.
+                    The format version, <code>"1.2"</code>. Required.
                   </td>
                 </tr>
                 <tr>
@@ -151,6 +165,14 @@ export function FormatPage() {
                     <code>links</code>
                   </td>
                   <td>All arrows of the document, on every level, in one list.</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>journeys</code>
+                  </td>
+                  <td>
+                    Guided tours through the diagram; see <a href="#journeys">journeys</a>. Since 1.2.
+                  </td>
                 </tr>
                 <tr>
                   <td>
@@ -416,6 +438,27 @@ export function FormatPage() {
             or the error in the title too, and colour a few blocks: when every block is coloured, none stands out.
           </p>
 
+          <h2 id="journeys">Journeys</h2>
+          <p>
+            A journey is a guided tour: screens of the diagram one after another, like slides. The viewer moves
+            between them the way a reader would, up to the screen two steps share and down again, so nobody loses
+            their place. A diagram can hold several journeys, one for newcomers and one for reviewers, say.
+          </p>
+          <CodeBlock code={JOURNEY_EXAMPLE} label="Journey" />
+          <p>
+            Each step points at a block, like a link to a screen: <code>in</code> shows the screen inside the block,{' '}
+            <code>at</code> its level with the block outlined, and a step with neither shows the top level. A step
+            can have a <code>label</code> shown with it, a <code>duration</code> in seconds for when the journey
+            plays (6 when left out), and <code>notes</code> in Markdown, like speaker notes, which viewers do not show
+            yet.
+          </p>
+          <p>
+            Readers start a journey from the Journeys menu, step with the arrow keys or Space, or press play. The URL
+            keeps the step, <code>#journey=checkout&amp;step=2</code>, so a reload or a shared link opens the same
+            step. In <a href="/editor/">the editor</a>, Journeys → New journey records one: open a screen and add it
+            as a step.
+          </p>
+
           <h2 id="checks">Checking a diagram</h2>
           <p>A diagram that breaks these rules is rejected, with the place of each problem in the JSON:</p>
           <ul>
@@ -429,8 +472,12 @@ export function FormatPage() {
               a block has both <code>children</code> and <code>details</code>: it opens into blocks or into text, not
               both;
             </li>
-            <li>two blocks or two links share an id;</li>
-            <li>a link points at an id that is not a block, or from a block to itself;</li>
+            <li>two blocks, two links or two journeys share an id;</li>
+            <li>a link or a journey step points at an id that is not a block, or a link goes from a block to itself;</li>
+            <li>
+              a journey step has both <code>in</code> and <code>at</code>, or a <code>duration</code> that is not a
+              positive number;
+            </li>
             <li>
               <code>direction</code>, <code>style</code>, <code>shape</code> or <code>tone</code> is not a string,
               or the version is not <code>1.x</code>.
@@ -452,20 +499,21 @@ export function FormatPage() {
             </li>
             <li>
               In code, <code>validateDocument()</code> from <a href={CORE}>@takesix/core</a> checks everything,
-              including what JSON Schema cannot: unique ids, link ends and overlapping blocks.{' '}
+              including what JSON Schema cannot: unique ids, link ends, journey steps and overlapping blocks.{' '}
               <code>lintLayout()</code> also warns when an arrow runs through a third block or two arrows cross.
             </li>
           </ul>
 
           <h2 id="extend">Extensions and versions</h2>
           <p>
-            Tools keep their own data in <code>meta</code> on the document, a block or a link, under keys with the
+            Tools keep their own data in <code>meta</code> on the document, a block, a link, a journey or a step,
+            under keys with the
             tool’s name: <code>{'{ "meta": { "confluence.pageId": "123" } }'}</code>. Every tool keeps the{' '}
             <code>meta</code> it does not understand, so data survives a trip through another editor.
           </p>
           <p>
             The version is <code>"major.minor"</code>. A minor version only adds optional fields and values, so a 1.0
-            reader opens any 1.x file. 1.1 added <code>tone</code>. A new major version is a breaking change, and readers refuse majors they do not know.
+            reader opens any 1.x file. 1.1 added <code>tone</code>, 1.2 added <code>journeys</code>. A new major version is a breaking change, and readers refuse majors they do not know.
           </p>
 
           <p className="doc-next">

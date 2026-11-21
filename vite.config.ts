@@ -28,7 +28,8 @@ const FAQ_JSONLD = `<script type="application/ld+json">${JSON.stringify({
 // files come from @takesix/core; `$id` is set to the served URL so the two
 // never disagree.
 const SCHEMAS: Record<string, string> = {
-  'schema/takesix-1.1.schema.json': '@takesix/core/schema.json',
+  'schema/takesix-1.2.schema.json': '@takesix/core/schema.json',
+  'schema/takesix-1.1.schema.json': '@takesix/core/schema-1.1.json',
   'schema/takesix-1.0.schema.json': '@takesix/core/schema-1.0.json',
 }
 const schemaJson = (path: string) => {

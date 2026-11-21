@@ -1,5 +1,5 @@
 {
-  "takesix": "1.0",
+  "takesix": "1.2",
   "title": "TakeSix, explained by itself",
   "description": "Click any block to open it. Every screen shows six blocks at most; longer text opens next to the block",
   "blocks": [
@@ -163,6 +163,38 @@
       "from": "format",
       "to": "apps",
       "label": "read"
+    }
+  ],
+  "journeys": [
+    {
+      "id": "quick-tour",
+      "title": "A quick tour",
+      "description": "The whole idea in six screens",
+      "steps": [
+        {
+          "label": "TakeSix, explained by itself"
+        },
+        {
+          "in": "idea",
+          "label": "The idea: six blocks, depth on demand"
+        },
+        {
+          "in": "idea-six",
+          "label": "Never more than six on a screen"
+        },
+        {
+          "in": "agents",
+          "label": "Agents write diagrams"
+        },
+        {
+          "in": "format",
+          "label": "Into a small, checked JSON format"
+        },
+        {
+          "in": "apps",
+          "label": "Apps read and show them"
+        }
+      ]
     }
   ]
 }
