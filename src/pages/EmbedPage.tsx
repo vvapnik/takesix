@@ -1,12 +1,35 @@
+import { useEffect, type DetailedHTMLProps, type HTMLAttributes } from 'react'
 import { SiteHeader } from '../shared/SiteHeader'
 import { SiteFooter } from '../shared/SiteFooter'
 import { CodeBlock } from '../shared/CodeBlock'
+import { EXAMPLES } from '../examples'
+
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements {
+      'take-six': DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> & { src?: string; theme?: string; view?: string; menu?: boolean }
+    }
+  }
+}
 
 // How to put a diagram on another page without React: an <iframe> with a
 // self-contained HTML file, or the <take-six> web component from a CDN.
 
 const REACT = 'https://github.com/vvapnik/takesix-react'
 const ELEMENT_URL = 'https://cdn.jsdelivr.net/npm/@takesix/react@1/dist/element.js'
+
+// The live example below is the real element from the CDN, as a reader's page would load it
+const DEMO_JSON = JSON.stringify(EXAMPLES.architecture).replace(/</g, '\\u003c')
+
+function useElementScript() {
+  useEffect(() => {
+    if (customElements.get('take-six') || document.querySelector(`script[src="${ELEMENT_URL}"]`)) return
+    const script = document.createElement('script')
+    script.src = ELEMENT_URL
+    script.defer = true
+    document.head.append(script)
+  }, [])
+}
 
 const BUILD = `npx @takesix/react build architecture.takesix.json   # writes architecture.html`
 
@@ -42,6 +65,7 @@ const SECTIONS = [
 ]
 
 export function EmbedPage() {
+  useElementScript()
   return (
     <div className="page">
       <SiteHeader />
@@ -101,6 +125,12 @@ export function EmbedPage() {
             <code>{'<take-six>'}</code> tag shows a diagram:
           </p>
           <CodeBlock code={ELEMENT} label="HTML" />
+          <p>This is such an element, with the architecture example inside it. Click a block:</p>
+          <figure className="embed-demo">
+            <take-six menu>
+              <script type="application/json" dangerouslySetInnerHTML={{ __html: DEMO_JSON }} />
+            </take-six>
+          </figure>
           <p>
             The file in <code>src</code> is fetched by the browser, so it must be on the same site or served with CORS
             (GitHub raw files are). The document can also sit inside the tag, which needs no extra request:
