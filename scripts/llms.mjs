@@ -40,6 +40,7 @@ claude mcp add --scope user takesix -- npx -y @takesix/mcp
 - [Guide: connect TakeSix to your agent](${SITE}/agents/): Claude Code, Claude Desktop, Codex, Cursor, VS Code and other MCP clients
 - [The format in plain words](${SITE}/format/): blocks, the 6×6 grid, links, checks
 - [FAQ](${SITE}/faq/): what TakeSix is and how it differs from Mermaid, C4 and draw.io
+- [Embed](${SITE}/embed/): a diagram on any web page, as an iframe or the \`<take-six>\` web component
 - [Format specification](${GITHUB}/takesix-core/blob/main/FORMAT.md): the exact rules of the JSON format
 - [JSON Schema](https://takesix.vapnik.de/schema/takesix-1.0.schema.json)
 

@@ -8,6 +8,7 @@ import { PresentationPage } from './pages/PresentationPage'
 import { GuidePage } from './pages/GuidePage'
 import { FormatPage } from './pages/FormatPage'
 import { FaqPage } from './pages/FaqPage'
+import { EmbedPage } from './pages/EmbedPage'
 
 // Used at build time only (scripts/prerender.mjs): every page as HTML, so
 // search engines and AI crawlers that do not run JavaScript see the text.
@@ -21,6 +22,7 @@ const PAGES: Record<string, () => ReactNode> = {
   'agents/index.html': () => <GuidePage />,
   'format/index.html': () => <FormatPage />,
   'faq/index.html': () => <FaqPage />,
+  'embed/index.html': () => <EmbedPage />,
 }
 
 export const pages = Object.keys(PAGES)

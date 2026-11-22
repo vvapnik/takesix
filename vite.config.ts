@@ -8,8 +8,8 @@ import about from './src/about.json'
 
 // Served from https://takesix.vapnik.de/ (vvapnik.github.io/takesix/ redirects
 // there). Relative asset paths work at the domain root and under /takesix/ alike.
-// Pages: the landing page, the editor, the examples, the agent guide, the format
-// and the FAQ.
+// Pages: the landing page, the editor, the examples, the agent guide, the format,
+// the FAQ and embedding.
 
 // FAQPage structured data for the FAQ page, from the same source as its text
 const FAQ_JSONLD = `<script type="application/ld+json">${JSON.stringify({
@@ -81,6 +81,7 @@ export default defineConfig({
         agents: resolve(import.meta.dirname, 'agents/index.html'),
         format: resolve(import.meta.dirname, 'format/index.html'),
         faq: resolve(import.meta.dirname, 'faq/index.html'),
+        embed: resolve(import.meta.dirname, 'embed/index.html'),
       },
     },
   },
